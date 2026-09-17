@@ -1102,3 +1102,351 @@ footer {
     }
 
 }
+
+.book-cover {
+    overflow: hidden;
+}
+
+.book-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* =================================
+   ADD BOOK MODAL
+================================= */
+
+.add-book-section {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    padding: 70px 24px;
+    box-sizing: border-box;
+
+    background: rgba(41, 37, 31, 0.42);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+.add-book-section.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.add-book-section > .shelf-heading,
+.add-book-section > form {
+    position: relative;
+    z-index: 1;
+}
+
+.add-book-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+/* The actual panel */
+
+.add-book-section {
+    overflow-y: auto;
+}
+
+.add-book-section .shelf-heading,
+#add-book-form {
+    width: min(100%, 620px);
+}
+
+.add-book-section .shelf-heading {
+    display: none;
+}
+
+#add-book-form {
+    background: #f5f1e8;
+    border: 1px solid #d8d0c1;
+
+    padding: 36px 38px 40px;
+
+    box-sizing: border-box;
+
+    transform: translateY(30px);
+    transition: transform 0.3s ease;
+}
+
+.add-book-section.is-open #add-book-form {
+    transform: translateY(0);
+}
+
+#add-book-form label {
+    display: block;
+
+    margin: 0 0 8px;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+
+    color: #5d574e;
+}
+
+#add-book-form input[type="text"],
+#add-book-form select,
+#add-book-form textarea {
+    display: block;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-bottom: 20px;
+
+    padding: 14px 15px;
+
+    border: 1px solid #cfc6b7;
+    border-radius: 0;
+
+    background: #faf8f2;
+    color: #29251f;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.95rem;
+}
+
+#add-book-form input[type="text"],
+#add-book-form select {
+    height: 50px;
+}
+
+#add-book-form textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+#add-book-form input[type="text"]:focus,
+#add-book-form select:focus,
+#add-book-form textarea:focus {
+    outline: none;
+    border-color: #29251f;
+}
+
+#add-book-form input[type="file"] {
+    display: block;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-bottom: 20px;
+    padding: 18px;
+
+    border: 1px dashed #c5bcad;
+
+    background: #faf8f2;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.8rem;
+
+    color: #5d574e;
+
+    cursor: pointer;
+}
+
+#add-book-form input[type="file"]::file-selector-button {
+    margin-right: 12px;
+
+    padding: 9px 13px;
+
+    border: 1px solid #29251f;
+    background: #29251f;
+    color: #f5f1e8;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.72rem;
+
+    cursor: pointer;
+}
+
+/* =================================
+   EDIT / DELETE CONTROLS
+================================= */
+
+.shelf-book .shelf-book-info .book-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 16px !important;
+}
+
+.shelf-book .shelf-book-info .book-actions button.edit-book,
+.shelf-book .shelf-book-info .book-actions button.delete-book {
+    display: inline-block !important;
+
+    width: auto !important;
+    height: auto !important;
+
+    margin: 0 !important;
+
+    padding: 7px 12px !important;
+
+    border: 1px solid #cfc6b7 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+    color: #29251f !important;
+
+    font-family: Arial, sans-serif !important;
+    font-size: 0.7rem !important;
+    font-weight: normal !important;
+    letter-spacing: 0.04em !important;
+
+    cursor: pointer !important;
+
+    box-shadow: none !important;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease !important;
+}
+
+.shelf-book .shelf-book-info .book-actions button.edit-book:hover {
+    background: #29251f !important;
+    border-color: #29251f !important;
+    color: #f5f1e8 !important;
+}
+
+.shelf-book .shelf-book-info .book-actions button.delete-book {
+    color: #6d665d !important;
+}
+
+.shelf-book .shelf-book-info .book-actions button.delete-book:hover {
+    background: #e5ddd1 !important;
+    border-color: #bdb3a4 !important;
+    color: #29251f !important;
+}
+
+button.edit-book,
+button.delete-book {
+    appearance: none;
+    -webkit-appearance: none;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 8px 14px !important;
+    margin: 16px 6px 0 0 !important;
+
+    border: 1px solid #29251f !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+    color: #29251f !important;
+
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    box-shadow: none !important;
+}
+
+button.edit-book:hover {
+    background: #29251f !important;
+    color: #f5f1e8 !important;
+}
+
+button.delete-book {
+    border-color: #bdb3a4 !important;
+    color: #6d665d !important;
+}
+
+button.delete-book:hover {
+    background: #e5ddd1 !important;
+    color: #29251f !important;
+}
+
+/* =================================
+   ADD BOOK MODAL PANEL
+================================= */
+
+.add-book-panel {
+    position: relative;
+
+    width: min(100%, 620px);
+    max-height: calc(100vh - 100px);
+
+    overflow-y: auto;
+
+    padding: 36px 38px 40px;
+
+    box-sizing: border-box;
+
+    background: #f5f1e8;
+    border: 1px solid #d8d0c1;
+
+    transform: translateY(30px);
+
+    transition: transform 0.3s ease;
+}
+
+.add-book-section.is-open .add-book-panel {
+    transform: translateY(0);
+}
+
+.add-book-panel .shelf-heading {
+    display: block;
+    width: 100%;
+    margin-bottom: 28px;
+}
+
+.add-book-panel #add-book-form {
+    width: 100%;
+    margin-top: 0;
+}
+
+.close-add-book {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none !important;
+    background: transparent !important;
+    color: #29251f !important;
+
+    font-family: Arial, sans-serif !important;
+    font-size: 25px !important;
+    font-weight: 300 !important;
+    line-height: 1 !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    cursor: pointer !important;
+}
+
+.close-add-book:hover {
+    background: transparent !important;
+    color: #777067 !important;
+}
