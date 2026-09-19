@@ -1450,3 +1450,17 @@ button.delete-book:hover {
     background: transparent !important;
     color: #777067 !important;
 }
+
+.empty-library {
+    padding: 28px 0;
+    border-top: 1px solid #d8d0c1;
+    border-bottom: 1px solid #d8d0c1;
+}
+
+.empty-library p {
+    margin: 0;
+    color: #777067;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+}
+
