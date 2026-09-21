@@ -2143,3 +2143,133 @@ button.delete-book:hover {
     }
 
 }
+
+/* =========================
+   NEAR YOU
+========================= */
+
+.near-you-intro {
+    max-width: 900px;
+}
+
+.near-you-intro .intro-copy {
+    max-width: 500px;
+    margin-top: 18px;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+
+.near-you-section {
+    margin-top: 65px;
+    margin-bottom: 100px;
+
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+
+/* Reader list */
+
+.nearby-list {
+    border-top: 1px solid #d8d0c1;
+}
+
+
+.nearby-reader {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+
+    align-items: center;
+
+    gap: 25px;
+
+    padding: 25px 0;
+
+    border-bottom: 1px solid #d8d0c1;
+}
+
+
+.reader-initials {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #cfc6b7;
+
+    color: #29251f;
+
+    font-family: Georgia, serif;
+    font-size: 0.9rem;
+}
+
+
+.reader-info h3 {
+    margin: 0 0 5px;
+
+    font-family: Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: normal;
+}
+
+
+.reader-info p {
+    margin: 0;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.75rem;
+}
+
+
+.reader-books {
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+
+    text-align: right;
+}
+
+
+/* Empty state */
+
+.nearby-empty {
+    padding: 45px 0;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+}
+
+
+@media (max-width: 700px) {
+
+    .near-you-section {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+
+    .nearby-reader {
+        grid-template-columns: 55px 1fr;
+        gap: 15px;
+    }
+
+
+    .reader-books {
+        grid-column: 2;
+
+        text-align: left;
+    }
+
+}

@@ -43,6 +43,37 @@ const defaultBooks = [
     }
 ];
 
+const defaultReaders = [
+    {
+        id: 1,
+        name: "Amara",
+        area: "Yaba",
+        books: 4,
+        initials: "AM"
+    },
+    {
+        id: 2,
+        name: "Daniel",
+        area: "Surulere",
+        books: 7,
+        initials: "DA"
+    },
+    {
+        id: 3,
+        name: "Tomi",
+        area: "Ikeja",
+        books: 3,
+        initials: "TO"
+    },
+    {
+        id: 4,
+        name: "Maya",
+        area: "Gbagada",
+        books: 5,
+        initials: "MY"
+    }
+];
+
 
 let books =
     JSON.parse(localStorage.getItem("bookxchangeBooks")) ||
@@ -1687,3 +1718,105 @@ if (requestForm) {
     );
 
 }
+
+/* =========================
+   NEAR YOU
+========================= */
+
+const nearbyList =
+    document.getElementById(
+        "nearby-list"
+    );
+
+
+const nearbyCount =
+    document.getElementById(
+        "nearby-count"
+    );
+
+
+function displayNearbyReaders() {
+
+    if (!nearbyList) return;
+
+
+    nearbyList.innerHTML = "";
+
+
+    if (nearbyCount) {
+
+        nearbyCount.textContent =
+            defaultReaders.length === 1
+                ? "1 reader"
+                : `${defaultReaders.length} readers`;
+    }
+
+
+    if (defaultReaders.length === 0) {
+
+        nearbyList.innerHTML = `
+            <div class="nearby-empty">
+                No readers found nearby yet.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    defaultReaders.forEach(
+        function (reader) {
+
+            const readerElement =
+                document.createElement(
+                    "article"
+                );
+
+
+            readerElement.classList.add(
+                "nearby-reader"
+            );
+
+
+            readerElement.innerHTML = `
+
+                <div class="reader-initials">
+                    ${reader.initials}
+                </div>
+
+
+                <div class="reader-info">
+
+                    <h3>
+                        ${reader.name}
+                    </h3>
+
+                    <p>
+                        ${reader.area}
+                    </p>
+
+                </div>
+
+
+                <div class="reader-books">
+                    ${reader.books}
+                    ${
+                        reader.books === 1
+                            ? "book"
+                            : "books"
+                    }
+                </div>
+
+            `;
+
+
+            nearbyList.appendChild(
+                readerElement
+            );
+
+        }
+    );
+}
+
+
+displayNearbyReaders();
