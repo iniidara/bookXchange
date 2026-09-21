@@ -31,16 +31,43 @@ const defaultBooks = [
     }
 ];
 
-let books = JSON.parse(localStorage.getItem("bookxchangeBooks")) || defaultBooks;
+
+// =========================
+// BOOK DATA
+// =========================
+
+let books =
+    JSON.parse(localStorage.getItem("bookxchangeBooks")) ||
+    defaultBooks;
 
 function saveBooks() {
-    localStorage.setItem("bookxchangeBooks", JSON.stringify(books));
+    localStorage.setItem(
+        "bookxchangeBooks",
+        JSON.stringify(books)
+    );
 }
 
 let editingBookId = null;
 
+
+// =========================
+// ELEMENTS
+// =========================
+
 const bookList = document.getElementById("book-list");
 const libraryList = document.getElementById("library-list");
+
+const addBookButton =
+    document.getElementById("add-book-button");
+
+const addBookSection =
+    document.getElementById("add-book-section");
+
+const closeAddBook =
+    document.getElementById("close-add-book");
+
+const addBookForm =
+    document.getElementById("add-book-form");
 
 
 // =========================
@@ -49,13 +76,19 @@ const libraryList = document.getElementById("library-list");
 
 function displayBooks() {
 
-    const bookCount = document.getElementById("book-count");
+    const bookCount =
+        document.getElementById("book-count");
 
-    const availableBooks = books.filter(function (book) {
-        return book.status === "available";
-    });
+    const availableBooks =
+        books.filter(function (book) {
+            return book.status === "available";
+        });
+
+
+    // Update available book count
 
     if (bookCount) {
+
         const count = availableBooks.length;
 
         bookCount.textContent =
@@ -64,26 +97,69 @@ function displayBooks() {
                 : `${count} books`;
     }
 
+
     if (!bookList) return;
+
+
+    // Clear existing books
 
     bookList.innerHTML = "";
 
+
+    // Empty state
+
+    if (availableBooks.length === 0) {
+
+        bookList.innerHTML = `
+            <div class="empty-shelf">
+
+                <p>
+                    There are no books available for exchange right now.
+                </p>
+
+                <button
+                    type="button"
+                    class="empty-shelf-link"
+                    id="empty-add-book"
+                >
+                    Add a book
+                </button>
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    // Display available books
+
     availableBooks.forEach(function (book, index) {
 
-        const bookElement = document.createElement("article");
+        const bookElement =
+            document.createElement("article");
 
         bookElement.classList.add("shelf-book");
 
-        const coverClass = `cover-${index + 1}`;
+
+        const coverClass =
+            `cover-${index + 1}`;
+
 
         bookElement.innerHTML = `
             <div class="book-cover ${book.image ? "" : coverClass}">
+
                 ${
                     book.image
-                        ? `<img src="${book.image}" alt="${book.title}">`
+                        ? `<img
+                                src="${book.image}"
+                                alt="${book.title}"
+                           >`
                         : `<span>${book.title}</span>`
                 }
+
             </div>
+
 
             <div class="shelf-book-info">
 
@@ -95,6 +171,7 @@ function displayBooks() {
                     Available for exchange
                 </span>
 
+
                 <div class="book-actions">
 
                     <button
@@ -104,12 +181,14 @@ function displayBooks() {
                         Edit
                     </button>
 
+
                     <button
                         class="delete-book"
                         data-id="${book.id}"
                     >
                         Delete
                     </button>
+
 
                     <button
                         class="keep-book"
@@ -123,6 +202,7 @@ function displayBooks() {
             </div>
         `;
 
+
         bookList.appendChild(bookElement);
     });
 }
@@ -134,15 +214,20 @@ function displayBooks() {
 
 function displayLibrary() {
 
-    const libraryCount = document.getElementById("library-count");
+    const libraryCount =
+        document.getElementById("library-count");
+
 
     if (!libraryList) return;
 
+
     libraryList.innerHTML = "";
 
-    const keptBooks = books.filter(function (book) {
-        return book.status === "keeping";
-    });
+
+    const keptBooks =
+        books.filter(function (book) {
+            return book.status === "keeping";
+        });
 
 
     // Update library count
@@ -153,17 +238,20 @@ function displayLibrary() {
             keptBooks.length === 1
                 ? "1 book"
                 : `${keptBooks.length} books`;
-
     }
 
 
-    // Empty state
+    // Empty library state
 
     if (keptBooks.length === 0) {
 
         libraryList.innerHTML = `
             <div class="empty-library">
-                <p>You haven't kept any books yet.</p>
+
+                <p>
+                    You haven't kept any books yet.
+                </p>
+
             </div>
         `;
 
@@ -175,17 +263,26 @@ function displayLibrary() {
 
     keptBooks.forEach(function (book, index) {
 
-        const libraryBook = document.createElement("div");
+        const libraryBook =
+            document.createElement("div");
 
         libraryBook.classList.add("library-book");
 
+
         libraryBook.innerHTML = `
-            <span>${String(index + 1).padStart(2, "0")}</span>
+            <span>
+                ${String(index + 1).padStart(2, "0")}
+            </span>
+
 
             <div>
+
                 <h3>${book.title}</h3>
+
                 <p>${book.author}</p>
+
             </div>
+
 
             <button
                 class="make-available"
@@ -195,12 +292,15 @@ function displayLibrary() {
             </button>
         `;
 
+
         libraryList.appendChild(libraryBook);
     });
 }
 
 
-// Initial display
+// =========================
+// INITIAL DISPLAY
+// =========================
 
 displayBooks();
 displayLibrary();
@@ -215,19 +315,29 @@ if (bookList) {
     bookList.addEventListener("click", function (event) {
 
 
+        // -------------------------
         // KEEP BOOK
+        // -------------------------
 
-        if (event.target.classList.contains("keep-book")) {
+        if (
+            event.target.classList.contains("keep-book")
+        ) {
 
-            const bookId = Number(event.target.dataset.id);
+            const bookId =
+                Number(event.target.dataset.id);
 
-            const book = books.find(function (book) {
-                return book.id === bookId;
-            });
+
+            const book =
+                books.find(function (book) {
+                    return book.id === bookId;
+                });
+
 
             if (!book) return;
 
+
             book.status = "keeping";
+
 
             saveBooks();
 
@@ -238,46 +348,75 @@ if (bookList) {
         }
 
 
+        // -------------------------
         // EDIT BOOK
+        // -------------------------
 
-        if (event.target.classList.contains("edit-book")) {
+        if (
+            event.target.classList.contains("edit-book")
+        ) {
 
-            const bookId = Number(event.target.dataset.id);
+            const bookId =
+                Number(event.target.dataset.id);
 
-            const book = books.find(function (book) {
-                return book.id === bookId;
-            });
+
+            const book =
+                books.find(function (book) {
+                    return book.id === bookId;
+                });
+
 
             if (!book) return;
 
+
             editingBookId = bookId;
 
-            document.getElementById("book-title").value = book.title;
 
-            document.getElementById("book-author").value = book.author;
+            document.getElementById("book-title").value =
+                book.title;
 
-            document.getElementById("book-condition").value = book.condition;
 
-            document.getElementById("book-description").value = book.description;
+            document.getElementById("book-author").value =
+                book.author;
 
-            document.getElementById("book-form-submit").textContent =
-                "Save changes";
+
+            document.getElementById("book-condition").value =
+                book.condition;
+
+
+            document.getElementById("book-description").value =
+                book.description;
+
+
+            document.getElementById(
+                "book-form-submit"
+            ).textContent = "Save changes";
+
 
             addBookSection.classList.add("is-open");
+
 
             return;
         }
 
 
+        // -------------------------
         // DELETE BOOK
+        // -------------------------
 
-        if (event.target.classList.contains("delete-book")) {
+        if (
+            event.target.classList.contains("delete-book")
+        ) {
 
-            const bookId = Number(event.target.dataset.id);
+            const bookId =
+                Number(event.target.dataset.id);
 
-            const bookIndex = books.findIndex(function (book) {
-                return book.id === bookId;
-            });
+
+            const bookIndex =
+                books.findIndex(function (book) {
+                    return book.id === bookId;
+                });
+
 
             if (bookIndex !== -1) {
 
@@ -288,6 +427,7 @@ if (bookList) {
                 displayBooks();
                 displayLibrary();
             }
+
 
             return;
         }
@@ -302,88 +442,164 @@ if (bookList) {
 
 if (libraryList) {
 
-    libraryList.addEventListener("click", function (event) {
+    libraryList.addEventListener(
+        "click",
+        function (event) {
 
-        if (event.target.classList.contains("make-available")) {
+            if (
+                event.target.classList.contains(
+                    "make-available"
+                )
+            ) {
 
-            const bookId = Number(event.target.dataset.id);
+                const bookId =
+                    Number(event.target.dataset.id);
 
-            const book = books.find(function (book) {
-                return book.id === bookId;
-            });
 
-            if (!book) return;
+                const book =
+                    books.find(function (book) {
+                        return book.id === bookId;
+                    });
 
-            book.status = "available";
 
-            saveBooks();
+                if (!book) return;
 
-            displayBooks();
-            displayLibrary();
+
+                book.status = "available";
+
+
+                saveBooks();
+
+                displayBooks();
+                displayLibrary();
+            }
+
         }
-
-    });
+    );
 }
 
 
 // =========================
-// ADD BOOK MODAL
+// OPEN ADD BOOK MODAL
 // =========================
-
-const addBookButton = document.getElementById("add-book-button");
-
-const addBookSection = document.getElementById("add-book-section");
-
 
 if (addBookButton && addBookSection) {
 
-    addBookButton.addEventListener("click", function () {
+    addBookButton.addEventListener(
+        "click",
+        function () {
 
-        // Make sure this is a fresh Add form
+            // Make sure this is a fresh Add form
 
-        editingBookId = null;
+            editingBookId = null;
 
-        const form = document.getElementById("add-book-form");
 
-        if (form) {
-            form.reset();
+            if (addBookForm) {
+                addBookForm.reset();
+            }
+
+
+            const submitButton =
+                document.getElementById(
+                    "book-form-submit"
+                );
+
+
+            if (submitButton) {
+                submitButton.textContent = "Add book";
+            }
+
+
+            addBookSection.classList.toggle(
+                "is-open"
+            );
         }
-
-        document.getElementById("book-form-submit").textContent =
-            "Add book";
-
-        addBookSection.classList.toggle("is-open");
-    });
+    );
 }
 
 
-// CLOSE BUTTON
+// =========================
+// EMPTY SHELF → ADD BOOK
+// =========================
 
-const closeAddBook = document.getElementById("close-add-book");
+document.addEventListener(
+    "click",
+    function (event) {
+
+        if (
+            event.target.id === "empty-add-book"
+        ) {
+
+            editingBookId = null;
+
+
+            if (addBookForm) {
+                addBookForm.reset();
+            }
+
+
+            const submitButton =
+                document.getElementById(
+                    "book-form-submit"
+                );
+
+
+            if (submitButton) {
+                submitButton.textContent = "Add book";
+            }
+
+
+            if (addBookSection) {
+                addBookSection.classList.add(
+                    "is-open"
+                );
+            }
+        }
+
+    }
+);
+
+
+// =========================
+// CLOSE MODAL
+// =========================
 
 if (closeAddBook && addBookSection) {
 
-    closeAddBook.addEventListener("click", function () {
+    closeAddBook.addEventListener(
+        "click",
+        function () {
 
-        addBookSection.classList.remove("is-open");
+            addBookSection.classList.remove(
+                "is-open"
+            );
 
-    });
+        }
+    );
 }
 
 
+// =========================
 // CLICK OUTSIDE MODAL
+// =========================
 
 if (addBookSection) {
 
-    addBookSection.addEventListener("click", function (event) {
+    addBookSection.addEventListener(
+        "click",
+        function (event) {
 
-        if (event.target === addBookSection) {
+            if (
+                event.target === addBookSection
+            ) {
 
-            addBookSection.classList.remove("is-open");
+                addBookSection.classList.remove(
+                    "is-open"
+                );
+            }
 
         }
-
-    });
+    );
 }
 
 
@@ -391,155 +607,200 @@ if (addBookSection) {
 // ADD / EDIT BOOK FORM
 // =========================
 
-const addBookForm = document.getElementById("add-book-form");
-
-
 if (addBookForm) {
 
-    addBookForm.addEventListener("submit", function (event) {
+    addBookForm.addEventListener(
+        "submit",
+        function (event) {
 
-        event.preventDefault();
-
-
-        const title =
-            document.getElementById("book-title").value.trim();
-
-        const author =
-            document.getElementById("book-author").value.trim();
-
-        const condition =
-            document.getElementById("book-condition").value;
-
-        const description =
-            document.getElementById("book-description").value.trim();
+            event.preventDefault();
 
 
-        const imageInput =
-            document.getElementById("book-image");
-
-        const imageFile =
-            imageInput.files[0];
-
-
-        // =========================
-        // EDIT EXISTING BOOK
-        // =========================
-
-        if (editingBookId !== null) {
-
-            const book = books.find(function (book) {
-
-                return book.id === editingBookId;
-
-            });
+            const title =
+                document
+                    .getElementById("book-title")
+                    .value
+                    .trim();
 
 
-            if (book) {
-
-                book.title = title;
-
-                book.author = author;
-
-                book.condition = condition;
-
-                book.description = description;
-
-            }
+            const author =
+                document
+                    .getElementById("book-author")
+                    .value
+                    .trim();
 
 
-            editingBookId = null;
-
-            saveBooks();
-
-            displayBooks();
-
-            displayLibrary();
-
-            addBookForm.reset();
-
-            document.getElementById("book-form-submit").textContent =
-                "Add book";
-
-            addBookSection.classList.remove("is-open");
-
-            return;
-        }
+            const condition =
+                document
+                    .getElementById("book-condition")
+                    .value;
 
 
-        // =========================
-        // ADD NEW BOOK
-        // =========================
-
-        const newBook = {
-
-            id: Date.now(),
-
-            title: title,
-
-            author: author,
-
-            condition: condition,
-
-            description: description,
-
-            image: "",
-
-            status: "available",
-
-            ownerId: 1
-
-        };
+            const description =
+                document
+                    .getElementById("book-description")
+                    .value
+                    .trim();
 
 
-        // If a photo was uploaded
-
-        if (imageFile) {
-
-            const reader = new FileReader();
+            const imageInput =
+                document.getElementById("book-image");
 
 
-            reader.onload = function () {
+            const imageFile =
+                imageInput
+                    ? imageInput.files[0]
+                    : null;
 
-                newBook.image = reader.result;
 
-                books.push(newBook);
+            // =========================
+            // EDIT EXISTING BOOK
+            // =========================
+
+            if (editingBookId !== null) {
+
+                const book =
+                    books.find(function (book) {
+                        return book.id === editingBookId;
+                    });
+
+
+                if (book) {
+
+                    book.title = title;
+
+                    book.author = author;
+
+                    book.condition = condition;
+
+                    book.description = description;
+                }
+
+
+                editingBookId = null;
+
 
                 saveBooks();
 
                 displayBooks();
-
                 displayLibrary();
+
 
                 addBookForm.reset();
 
-                addBookSection.classList.remove("is-open");
+
+                document.getElementById(
+                    "book-form-submit"
+                ).textContent = "Add book";
+
+
+                addBookSection.classList.remove(
+                    "is-open"
+                );
+
+
+                return;
+            }
+
+
+            // =========================
+            // ADD NEW BOOK
+            // =========================
+
+            const newBook = {
+
+                id: Date.now(),
+
+                title: title,
+
+                author: author,
+
+                condition: condition,
+
+                description: description,
+
+                image: "",
+
+                status: "available",
+
+                ownerId: 1
 
             };
 
 
-            reader.readAsDataURL(imageFile);
+            // =========================
+            // WITH IMAGE
+            // =========================
+
+            if (imageFile) {
+
+                const reader =
+                    new FileReader();
 
 
-        } else {
+                reader.onload = function () {
 
-            // No photo
+                    newBook.image =
+                        reader.result;
 
-            books.push(newBook);
 
-            saveBooks();
+                    books.push(newBook);
 
-            displayBooks();
 
-            displayLibrary();
+                    saveBooks();
 
-            addBookForm.reset();
 
-            addBookSection.classList.remove("is-open");
+                    displayBooks();
+                    displayLibrary();
+
+
+                    addBookForm.reset();
+
+
+                    addBookSection.classList.remove(
+                        "is-open"
+                    );
+                };
+
+
+                reader.readAsDataURL(
+                    imageFile
+                );
+
+            }
+
+
+            // =========================
+            // WITHOUT IMAGE
+            // =========================
+
+            else {
+
+                books.push(newBook);
+
+
+                saveBooks();
+
+
+                displayBooks();
+                displayLibrary();
+
+
+                addBookForm.reset();
+
+
+                addBookSection.classList.remove(
+                    "is-open"
+                );
+            }
 
         }
-
-    });
+    );
 }
 
+
+// =========================
+// DEBUG
+// =========================
 
 console.log(books);
