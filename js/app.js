@@ -1,30 +1,42 @@
+/* =========================
+   BOOK DATA
+========================= */
+
 const defaultBooks = [
     {
         id: 1,
         title: "The Great Gatsby",
         author: "F. Scott Fitzgerald",
         condition: "Good",
-        description: "A classic novel about wealth, love and the American Dream.",
+        category: "classics",
+        description:
+            "A classic novel about wealth, love and the American Dream.",
         image: "",
         status: "available",
         ownerId: 1
     },
+
     {
         id: 2,
         title: "Norwegian Wood",
         author: "Haruki Murakami",
         condition: "Like New",
-        description: "A quiet story about memory, love and growing up.",
+        category: "fiction",
+        description:
+            "A quiet story about memory, love and growing up.",
         image: "",
         status: "available",
         ownerId: 1
     },
+
     {
         id: 3,
         title: "The Secret History",
         author: "Donna Tartt",
         condition: "Good",
-        description: "A literary mystery about a group of college students.",
+        category: "fiction",
+        description:
+            "A literary mystery about a group of college students.",
         image: "",
         status: "available",
         ownerId: 1
@@ -32,13 +44,10 @@ const defaultBooks = [
 ];
 
 
-// =========================
-// BOOK DATA
-// =========================
-
 let books =
     JSON.parse(localStorage.getItem("bookxchangeBooks")) ||
     defaultBooks;
+
 
 function saveBooks() {
     localStorage.setItem(
@@ -47,15 +56,23 @@ function saveBooks() {
     );
 }
 
+
+/* =========================
+   EDITING STATE
+========================= */
+
 let editingBookId = null;
 
 
-// =========================
-// ELEMENTS
-// =========================
+/* =========================
+   SHELF ELEMENTS
+========================= */
 
-const bookList = document.getElementById("book-list");
-const libraryList = document.getElementById("library-list");
+const bookList =
+    document.getElementById("book-list");
+
+const libraryList =
+    document.getElementById("library-list");
 
 const addBookButton =
     document.getElementById("add-book-button");
@@ -70,14 +87,15 @@ const addBookForm =
     document.getElementById("add-book-form");
 
 
-// =========================
-// DISPLAY AVAILABLE BOOKS
-// =========================
+/* =========================
+   DISPLAY AVAILABLE BOOKS
+========================= */
 
 function displayBooks() {
 
     const bookCount =
         document.getElementById("book-count");
+
 
     const availableBooks =
         books.filter(function (book) {
@@ -85,11 +103,12 @@ function displayBooks() {
         });
 
 
-    // Update available book count
+    /* Count */
 
     if (bookCount) {
 
-        const count = availableBooks.length;
+        const count =
+            availableBooks.length;
 
         bookCount.textContent =
             count === 1
@@ -101,12 +120,10 @@ function displayBooks() {
     if (!bookList) return;
 
 
-    // Clear existing books
-
     bookList.innerHTML = "";
 
 
-    // Empty state
+    /* Empty state */
 
     if (availableBooks.length === 0) {
 
@@ -132,14 +149,17 @@ function displayBooks() {
     }
 
 
-    // Display available books
+    /* Render books */
 
     availableBooks.forEach(function (book, index) {
 
         const bookElement =
             document.createElement("article");
 
-        bookElement.classList.add("shelf-book");
+
+        bookElement.classList.add(
+            "shelf-book"
+        );
 
 
         const coverClass =
@@ -147,15 +167,22 @@ function displayBooks() {
 
 
         bookElement.innerHTML = `
+
             <div class="book-cover ${book.image ? "" : coverClass}">
 
                 ${
                     book.image
-                        ? `<img
+                        ? `
+                            <img
                                 src="${book.image}"
                                 alt="${book.title}"
-                           >`
-                        : `<span>${book.title}</span>`
+                            >
+                        `
+                        : `
+                            <span>
+                                ${book.title}
+                            </span>
+                        `
                 }
 
             </div>
@@ -163,9 +190,13 @@ function displayBooks() {
 
             <div class="shelf-book-info">
 
-                <h3>${book.title}</h3>
+                <h3>
+                    ${book.title}
+                </h3>
 
-                <p>${book.author}</p>
+                <p>
+                    ${book.author}
+                </p>
 
                 <span class="status">
                     Available for exchange
@@ -203,14 +234,16 @@ function displayBooks() {
         `;
 
 
-        bookList.appendChild(bookElement);
+        bookList.appendChild(
+            bookElement
+        );
     });
 }
 
 
-// =========================
-// DISPLAY MY LIBRARY
-// =========================
+/* =========================
+   DISPLAY MY LIBRARY
+========================= */
 
 function displayLibrary() {
 
@@ -230,7 +263,7 @@ function displayLibrary() {
         });
 
 
-    // Update library count
+    /* Count */
 
     if (libraryCount) {
 
@@ -241,7 +274,7 @@ function displayLibrary() {
     }
 
 
-    // Empty library state
+    /* Empty state */
 
     if (keptBooks.length === 0) {
 
@@ -259,17 +292,21 @@ function displayLibrary() {
     }
 
 
-    // Display kept books
+    /* Render library */
 
     keptBooks.forEach(function (book, index) {
 
         const libraryBook =
             document.createElement("div");
 
-        libraryBook.classList.add("library-book");
+
+        libraryBook.classList.add(
+            "library-book"
+        );
 
 
         libraryBook.innerHTML = `
+
             <span>
                 ${String(index + 1).padStart(2, "0")}
             </span>
@@ -277,9 +314,13 @@ function displayLibrary() {
 
             <div>
 
-                <h3>${book.title}</h3>
+                <h3>
+                    ${book.title}
+                </h3>
 
-                <p>${book.author}</p>
+                <p>
+                    ${book.author}
+                </p>
 
             </div>
 
@@ -290,170 +331,48 @@ function displayLibrary() {
             >
                 Make available
             </button>
+
         `;
 
 
-        libraryList.appendChild(libraryBook);
+        libraryList.appendChild(
+            libraryBook
+        );
     });
 }
 
 
-// =========================
-// INITIAL DISPLAY
-// =========================
+/* =========================
+   INITIAL SHELF DISPLAY
+========================= */
 
 displayBooks();
 displayLibrary();
 
 
-// =========================
-// AVAILABLE BOOK ACTIONS
-// =========================
+/* =========================
+   SHELF BOOK ACTIONS
+========================= */
 
 if (bookList) {
 
-    bookList.addEventListener("click", function (event) {
-
-
-        // -------------------------
-        // KEEP BOOK
-        // -------------------------
-
-        if (
-            event.target.classList.contains("keep-book")
-        ) {
-
-            const bookId =
-                Number(event.target.dataset.id);
-
-
-            const book =
-                books.find(function (book) {
-                    return book.id === bookId;
-                });
-
-
-            if (!book) return;
-
-
-            book.status = "keeping";
-
-
-            saveBooks();
-
-            displayBooks();
-            displayLibrary();
-
-            return;
-        }
-
-
-        // -------------------------
-        // EDIT BOOK
-        // -------------------------
-
-        if (
-            event.target.classList.contains("edit-book")
-        ) {
-
-            const bookId =
-                Number(event.target.dataset.id);
-
-
-            const book =
-                books.find(function (book) {
-                    return book.id === bookId;
-                });
-
-
-            if (!book) return;
-
-
-            editingBookId = bookId;
-
-
-            document.getElementById("book-title").value =
-                book.title;
-
-
-            document.getElementById("book-author").value =
-                book.author;
-
-
-            document.getElementById("book-condition").value =
-                book.condition;
-
-
-            document.getElementById("book-description").value =
-                book.description;
-
-
-            document.getElementById(
-                "book-form-submit"
-            ).textContent = "Save changes";
-
-
-            addBookSection.classList.add("is-open");
-
-
-            return;
-        }
-
-
-        // -------------------------
-        // DELETE BOOK
-        // -------------------------
-
-        if (
-            event.target.classList.contains("delete-book")
-        ) {
-
-            const bookId =
-                Number(event.target.dataset.id);
-
-
-            const bookIndex =
-                books.findIndex(function (book) {
-                    return book.id === bookId;
-                });
-
-
-            if (bookIndex !== -1) {
-
-                books.splice(bookIndex, 1);
-
-                saveBooks();
-
-                displayBooks();
-                displayLibrary();
-            }
-
-
-            return;
-        }
-
-    });
-}
-
-
-// =========================
-// MY LIBRARY ACTIONS
-// =========================
-
-if (libraryList) {
-
-    libraryList.addEventListener(
+    bookList.addEventListener(
         "click",
         function (event) {
 
+
+            /* KEEP */
+
             if (
                 event.target.classList.contains(
-                    "make-available"
+                    "keep-book"
                 )
             ) {
 
                 const bookId =
-                    Number(event.target.dataset.id);
+                    Number(
+                        event.target.dataset.id
+                    );
 
 
                 const book =
@@ -465,7 +384,184 @@ if (libraryList) {
                 if (!book) return;
 
 
-                book.status = "available";
+                book.status = "keeping";
+
+
+                saveBooks();
+
+                displayBooks();
+                displayLibrary();
+
+                return;
+            }
+
+
+            /* EDIT */
+
+            if (
+                event.target.classList.contains(
+                    "edit-book"
+                )
+            ) {
+
+                const bookId =
+                    Number(
+                        event.target.dataset.id
+                    );
+
+
+                const book =
+                    books.find(function (book) {
+                        return book.id === bookId;
+                    });
+
+
+                if (!book) return;
+
+
+                editingBookId =
+                    bookId;
+
+
+                document.getElementById(
+                    "book-title"
+                ).value =
+                    book.title;
+
+
+                document.getElementById(
+                    "book-author"
+                ).value =
+                    book.author;
+
+
+                document.getElementById(
+                    "book-condition"
+                ).value =
+                    book.condition;
+
+
+                const categoryInput =
+                    document.getElementById(
+                        "book-category"
+                    );
+
+
+                if (categoryInput) {
+
+                    categoryInput.value =
+                        book.category || "";
+                }
+
+
+                document.getElementById(
+                    "book-description"
+                ).value =
+                    book.description;
+
+
+                const submitButton =
+                    document.getElementById(
+                        "book-form-submit"
+                    );
+
+
+                if (submitButton) {
+
+                    submitButton.textContent =
+                        "Save changes";
+                }
+
+
+                if (addBookSection) {
+
+                    addBookSection.classList.add(
+                        "is-open"
+                    );
+                }
+
+
+                return;
+            }
+
+
+            /* DELETE */
+
+            if (
+                event.target.classList.contains(
+                    "delete-book"
+                )
+            ) {
+
+                const bookId =
+                    Number(
+                        event.target.dataset.id
+                    );
+
+
+                const bookIndex =
+                    books.findIndex(function (book) {
+                        return book.id === bookId;
+                    });
+
+
+                if (bookIndex !== -1) {
+
+                    books.splice(
+                        bookIndex,
+                        1
+                    );
+
+
+                    saveBooks();
+
+                    displayBooks();
+                    displayLibrary();
+                }
+
+
+                return;
+            }
+
+        }
+    );
+}
+
+
+/* =========================
+   LIBRARY ACTIONS
+========================= */
+
+if (libraryList) {
+
+    libraryList.addEventListener(
+        "click",
+        function (event) {
+
+
+            if (
+                event.target.classList.contains(
+                    "make-available"
+                )
+            ) {
+
+                const bookId =
+                    Number(
+                        event.target.dataset.id
+                    );
+
+
+                const book =
+                    books.find(function (book) {
+                        return book.id === bookId;
+                    });
+
+
+                if (!book) return;
+
+
+                book.status =
+                    "available";
 
 
                 saveBooks();
@@ -479,22 +575,25 @@ if (libraryList) {
 }
 
 
-// =========================
-// OPEN ADD BOOK MODAL
-// =========================
+/* =========================
+   OPEN ADD BOOK MODAL
+========================= */
 
-if (addBookButton && addBookSection) {
+if (
+    addBookButton &&
+    addBookSection
+) {
 
     addBookButton.addEventListener(
         "click",
         function () {
 
-            // Make sure this is a fresh Add form
-
-            editingBookId = null;
+            editingBookId =
+                null;
 
 
             if (addBookForm) {
+
                 addBookForm.reset();
             }
 
@@ -506,34 +605,40 @@ if (addBookButton && addBookSection) {
 
 
             if (submitButton) {
-                submitButton.textContent = "Add book";
+
+                submitButton.textContent =
+                    "Add book";
             }
 
 
             addBookSection.classList.toggle(
                 "is-open"
             );
+
         }
     );
 }
 
 
-// =========================
-// EMPTY SHELF → ADD BOOK
-// =========================
+/* =========================
+   EMPTY SHELF ADD BUTTON
+========================= */
 
 document.addEventListener(
     "click",
     function (event) {
 
         if (
-            event.target.id === "empty-add-book"
+            event.target.id ===
+            "empty-add-book"
         ) {
 
-            editingBookId = null;
+            editingBookId =
+                null;
 
 
             if (addBookForm) {
+
                 addBookForm.reset();
             }
 
@@ -545,26 +650,33 @@ document.addEventListener(
 
 
             if (submitButton) {
-                submitButton.textContent = "Add book";
+
+                submitButton.textContent =
+                    "Add book";
             }
 
 
             if (addBookSection) {
+
                 addBookSection.classList.add(
                     "is-open"
                 );
             }
+
         }
 
     }
 );
 
 
-// =========================
-// CLOSE MODAL
-// =========================
+/* =========================
+   CLOSE ADD BOOK MODAL
+========================= */
 
-if (closeAddBook && addBookSection) {
+if (
+    closeAddBook &&
+    addBookSection
+) {
 
     closeAddBook.addEventListener(
         "click",
@@ -579,9 +691,10 @@ if (closeAddBook && addBookSection) {
 }
 
 
-// =========================
-// CLICK OUTSIDE MODAL
-// =========================
+/* =========================
+   CLOSE MODAL
+   CLICK OUTSIDE
+========================= */
 
 if (addBookSection) {
 
@@ -590,7 +703,8 @@ if (addBookSection) {
         function (event) {
 
             if (
-                event.target === addBookSection
+                event.target ===
+                addBookSection
             ) {
 
                 addBookSection.classList.remove(
@@ -603,9 +717,9 @@ if (addBookSection) {
 }
 
 
-// =========================
-// ADD / EDIT BOOK FORM
-// =========================
+/* =========================
+   ADD / EDIT BOOK
+========================= */
 
 if (addBookForm) {
 
@@ -616,35 +730,59 @@ if (addBookForm) {
             event.preventDefault();
 
 
+            /* Get form values */
+
             const title =
                 document
-                    .getElementById("book-title")
+                    .getElementById(
+                        "book-title"
+                    )
                     .value
                     .trim();
 
 
             const author =
                 document
-                    .getElementById("book-author")
+                    .getElementById(
+                        "book-author"
+                    )
                     .value
                     .trim();
 
 
             const condition =
                 document
-                    .getElementById("book-condition")
+                    .getElementById(
+                        "book-condition"
+                    )
                     .value;
+
+
+            const categoryInput =
+                document.getElementById(
+                    "book-category"
+                );
+
+
+            const category =
+                categoryInput
+                    ? categoryInput.value
+                    : "";
 
 
             const description =
                 document
-                    .getElementById("book-description")
+                    .getElementById(
+                        "book-description"
+                    )
                     .value
                     .trim();
 
 
             const imageInput =
-                document.getElementById("book-image");
+                document.getElementById(
+                    "book-image"
+                );
 
 
             const imageFile =
@@ -653,84 +791,137 @@ if (addBookForm) {
                     : null;
 
 
-            // =========================
-            // EDIT EXISTING BOOK
-            // =========================
+            /* =========================
+               EDIT EXISTING BOOK
+            ========================= */
 
-            if (editingBookId !== null) {
+            if (
+                editingBookId !== null
+            ) {
 
                 const book =
                     books.find(function (book) {
-                        return book.id === editingBookId;
+                        return (
+                            book.id ===
+                            editingBookId
+                        );
                     });
 
 
                 if (book) {
 
-                    book.title = title;
+                    book.title =
+                        title;
 
-                    book.author = author;
+                    book.author =
+                        author;
 
-                    book.condition = condition;
+                    book.condition =
+                        condition;
 
-                    book.description = description;
+                    book.category =
+                        category;
+
+                    book.description =
+                        description;
+
+
+                    /*
+                        Only replace the image
+                        if the user selected
+                        a new one.
+                    */
+
+                    if (imageFile) {
+
+                        const reader =
+                            new FileReader();
+
+
+                        reader.onload =
+                            function () {
+
+                                book.image =
+                                    reader.result;
+
+
+                                saveBooks();
+
+                                displayBooks();
+                                displayLibrary();
+                                displayDiscoverBooks();
+
+
+                                finishBookForm();
+
+                            };
+
+
+                        reader.readAsDataURL(
+                            imageFile
+                        );
+
+                        return;
+                    }
+
                 }
 
 
-                editingBookId = null;
+                editingBookId =
+                    null;
 
 
                 saveBooks();
 
                 displayBooks();
                 displayLibrary();
+                displayDiscoverBooks();
 
 
-                addBookForm.reset();
-
-
-                document.getElementById(
-                    "book-form-submit"
-                ).textContent = "Add book";
-
-
-                addBookSection.classList.remove(
-                    "is-open"
-                );
-
+                finishBookForm();
 
                 return;
             }
 
 
-            // =========================
-            // ADD NEW BOOK
-            // =========================
+            /* =========================
+               CREATE NEW BOOK
+            ========================= */
 
             const newBook = {
 
-                id: Date.now(),
+                id:
+                    Date.now(),
 
-                title: title,
+                title:
+                    title,
 
-                author: author,
+                author:
+                    author,
 
-                condition: condition,
+                condition:
+                    condition,
 
-                description: description,
+                category:
+                    category,
 
-                image: "",
+                description:
+                    description,
 
-                status: "available",
+                image:
+                    "",
 
-                ownerId: 1
+                status:
+                    "available",
 
+                ownerId:
+                    1
             };
 
 
-            // =========================
-            // WITH IMAGE
-            // =========================
+            /* =========================
+               SAVE WITH IMAGE
+            ========================= */
 
             if (imageFile) {
 
@@ -738,111 +929,197 @@ if (addBookForm) {
                     new FileReader();
 
 
-                reader.onload = function () {
+                reader.onload =
+                    function () {
 
-                    newBook.image =
-                        reader.result;
-
-
-                    books.push(newBook);
+                        newBook.image =
+                            reader.result;
 
 
-                    saveBooks();
+                        books.push(
+                            newBook
+                        );
 
 
-                    displayBooks();
-                    displayLibrary();
+                        saveBooks();
+
+                        displayBooks();
+                        displayLibrary();
+                        displayDiscoverBooks();
 
 
-                    addBookForm.reset();
+                        finishBookForm();
 
-
-                    addBookSection.classList.remove(
-                        "is-open"
-                    );
-                };
+                    };
 
 
                 reader.readAsDataURL(
                     imageFile
                 );
 
-            }
 
+            } else {
 
-            // =========================
-            // WITHOUT IMAGE
-            // =========================
-
-            else {
-
-                books.push(newBook);
+                books.push(
+                    newBook
+                );
 
 
                 saveBooks();
 
-
                 displayBooks();
                 displayLibrary();
+                displayDiscoverBooks();
 
 
-                addBookForm.reset();
-
-
-                addBookSection.classList.remove(
-                    "is-open"
-                );
+                finishBookForm();
             }
 
         }
     );
 }
 
+
+/* =========================
+   FINISH BOOK FORM
+========================= */
+
+function finishBookForm() {
+
+    editingBookId =
+        null;
+
+
+    if (addBookForm) {
+
+        addBookForm.reset();
+    }
+
+
+    const submitButton =
+        document.getElementById(
+            "book-form-submit"
+        );
+
+
+    if (submitButton) {
+
+        submitButton.textContent =
+            "Add book";
+    }
+
+
+    if (addBookSection) {
+
+        addBookSection.classList.remove(
+            "is-open"
+        );
+    }
+
+}
+
+
 /* =========================
    DISCOVER
 ========================= */
 
 const discoverBookList =
-    document.getElementById("discover-book-list");
+    document.getElementById(
+        "discover-book-list"
+    );
+
 
 const discoverCount =
-    document.getElementById("discover-count");
+    document.getElementById(
+        "discover-count"
+    );
+
 
 const bookSearch =
-    document.getElementById("book-search");
+    document.getElementById(
+        "book-search"
+    );
+
 
 const filterButtons =
-    document.querySelectorAll(".filter-button");
+    document.querySelectorAll(
+        ".filter-button"
+    );
 
+
+/* =========================
+   DISPLAY DISCOVER BOOKS
+========================= */
 
 function displayDiscoverBooks(
     searchTerm = "",
     category = "all"
 ) {
+
     if (!discoverBookList) return;
 
-    discoverBookList.innerHTML = "";
 
-    const availableBooks = books.filter(function (book) {
-        return book.status === "available";
-    });
+    discoverBookList.innerHTML =
+        "";
 
-    const filteredBooks = availableBooks.filter(function (book) {
 
-        const matchesSearch =
-            book.title
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            book.author
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase());
+    /* Only show available books */
 
-        return matchesSearch;
-    });
+    const availableBooks =
+        books.filter(function (book) {
 
+            return (
+                book.status ===
+                "available"
+            );
+
+        });
+
+
+    /* Filter */
+
+    const filteredBooks =
+        availableBooks.filter(
+            function (book) {
+
+
+                const search =
+                    searchTerm
+                        .toLowerCase()
+                        .trim();
+
+
+                const matchesSearch =
+                    book.title
+                        .toLowerCase()
+                        .includes(search) ||
+
+                    book.author
+                        .toLowerCase()
+                        .includes(search);
+
+
+                const matchesCategory =
+                    category === "all" ||
+                    book.category === category;
+
+
+                return (
+                    matchesSearch &&
+                    matchesCategory
+                );
+
+            }
+        );
+
+
+    /* Count */
 
     if (discoverCount) {
-        const count = filteredBooks.length;
+
+        const count =
+            filteredBooks.length;
+
 
         discoverCount.textContent =
             count === 1
@@ -851,91 +1128,116 @@ function displayDiscoverBooks(
     }
 
 
-    if (filteredBooks.length === 0) {
+    /* Empty state */
+
+    if (
+        filteredBooks.length ===
+        0
+    ) {
+
         discoverBookList.innerHTML = `
+
             <div class="discover-empty">
+
                 <p>
                     No books match your search.
                 </p>
+
             </div>
+
         `;
 
         return;
     }
 
 
-    filteredBooks.forEach(function (book, index) {
+    /* Render */
 
-        const bookElement =
-            document.createElement("article");
+    filteredBooks.forEach(
+        function (book, index) {
 
-        bookElement.classList.add(
-            "discover-book"
-        );
-
-
-        const coverClass =
-            `cover-${index + 1}`;
+            const bookElement =
+                document.createElement(
+                    "article"
+                );
 
 
-        bookElement.innerHTML = `
-
-            <div class="
-                discover-book-cover
-                ${book.image ? "" : "placeholder"}
-                ${book.image ? "" : coverClass}
-            ">
-
-                ${
-                    book.image
-                        ? `
-                            <img
-                                src="${book.image}"
-                                alt="${book.title}"
-                            >
-                        `
-                        : `
-                            <span>
-                                ${book.title}
-                            </span>
-                        `
-                }
-
-            </div>
+            bookElement.classList.add(
+                "discover-book"
+            );
 
 
-            <div class="discover-book-info">
-
-                <h3>
-                    ${book.title}
-                </h3>
-
-                <p class="author">
-                    ${book.author}
-                </p>
-
-                <span class="condition">
-                    ${book.condition}
-                </span>
-
-            </div>
-
-        `;
+            const coverClass =
+                `cover-${index + 1}`;
 
 
-        discoverBookList.appendChild(
-            bookElement
-        );
-    });
+            bookElement.innerHTML = `
+
+                <div
+                    class="
+                        discover-book-cover
+                        ${book.image ? "" : "placeholder"}
+                        ${book.image ? "" : coverClass}
+                    "
+                >
+
+                    ${
+                        book.image
+                            ? `
+                                <img
+                                    src="${book.image}"
+                                    alt="${book.title}"
+                                >
+                            `
+                            : `
+                                <span>
+                                    ${book.title}
+                                </span>
+                            `
+                    }
+
+                </div>
+
+
+                <div class="discover-book-info">
+
+                    <h3>
+                        ${book.title}
+                    </h3>
+
+                    <p class="author">
+                        ${book.author}
+                    </p>
+
+                    <span class="condition">
+                        ${book.condition}
+                    </span>
+
+                </div>
+
+            `;
+
+
+            discoverBookList.appendChild(
+                bookElement
+            );
+
+        }
+    );
+
 }
 
 
-/* Initial display */
+/* =========================
+   INITIAL DISCOVER DISPLAY
+========================= */
 
 displayDiscoverBooks();
 
 
-/* Search */
+/* =========================
+   DISCOVER SEARCH
+========================= */
 
 if (bookSearch) {
 
@@ -943,8 +1245,21 @@ if (bookSearch) {
         "input",
         function () {
 
+            const activeFilter =
+                document.querySelector(
+                    ".filter-button.active"
+                );
+
+
+            const category =
+                activeFilter
+                    ? activeFilter.dataset.category
+                    : "all";
+
+
             displayDiscoverBooks(
-                bookSearch.value
+                bookSearch.value,
+                category
             );
 
         }
@@ -953,39 +1268,69 @@ if (bookSearch) {
 }
 
 
-/* Category filters */
+/* =========================
+   DISCOVER CATEGORY FILTERS
+========================= */
 
-filterButtons.forEach(function (button) {
+filterButtons.forEach(
+    function (button) {
 
-    button.addEventListener(
-        "click",
-        function () {
-
-            filterButtons.forEach(
-                function (button) {
-                    button.classList.remove(
-                        "active"
-                    );
-                }
-            );
-
-            button.classList.add("active");
-
-            displayDiscoverBooks(
-                bookSearch
-                    ? bookSearch.value
-                    : "",
-                button.dataset.category
-            );
-
-        }
-    );
-
-});
+        button.addEventListener(
+            "click",
+            function () {
 
 
-// =========================
-// DEBUG
-// =========================
+                /* Remove active state */
 
-console.log(books);
+                filterButtons.forEach(
+                    function (button) {
+
+                        button.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                /* Activate clicked button */
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                /* Get category */
+
+                const category =
+                    button.dataset.category;
+
+
+                /* Keep current search */
+
+                const search =
+                    bookSearch
+                        ? bookSearch.value
+                        : "";
+
+
+                displayDiscoverBooks(
+                    search,
+                    category
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================
+   DEBUG
+========================= */
+
+console.log(
+    "BookXchange books:",
+    books
+);
