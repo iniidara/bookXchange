@@ -1,8 +1,8 @@
 # BookXchange
 
-BookXchange is a reader-first book exchange app designed to help people discover books they want, share books they no longer need, and connect with other readers nearby. The project began as a front-end concept and is being evolved into a real product with a Supabase-powered backend, real user accounts, persistent book data, and a more complete reading community experience.
+BookXchange is a reader-first book exchange prototype designed to help people discover books, share books they no longer need, and connect with nearby readers. It is currently a static multi-page front end with JavaScript-driven interactions and browser-local persistence.
 
-This README is intentionally written for the long-term direction of the project. It will continue to be updated as features, architecture, and product decisions evolve.
+The project is being evolved toward a Supabase-powered product with real user accounts, shared book data, and a complete exchange workflow.
 
 ## Product vision
 
@@ -19,17 +19,20 @@ The goal is not just to list books, but to make reading more social, practical, 
 
 ## Current status
 
-The project is currently in its prototype stage and includes:
+The project is a functional front-end prototype. It currently includes:
 
-- a landing page
-- a discovery page
-- a shelf management page
-- a profile page
-- a wishlist page
-- a near-you page
-- a basic JavaScript-driven demo flow
+- a landing page with recently available books and product overview
+- a discovery page with title/author search and category filters
+- clickable book cards with detail dialogs and exchange-request dialogs
+- a shelf page for adding, editing, deleting, keeping, and re-listing books
+- optional cover-image uploads stored as browser data URLs
+- available-book and kept-book counts with empty states
+- a near-you page with seeded readers and clickable reader-profile dialogs
+- a profile page with reader details, genres, current reading, shelf, and history
+- a wishlist page with sample wanted books
+- a matches page with sample potential exchanges
 
-At this stage, the app is a design and interaction prototype. It does not yet use a real database or authentication flow. The next phase is to connect it to Supabase and gradually replace the static mock data with live data.
+There is no authentication, shared database, or server-side request handling yet. Shelf data is saved only in the current browser through `localStorage`, using the `bookxchangeBooks` key. Nearby readers, matches, profile content, and wishlist content are currently static or seeded demo data.
 
 ## Core functionality we want to build
 
@@ -49,10 +52,11 @@ At this stage, the app is a design and interaction prototype. It does not yet us
 
 ### Discovery and matching
 - browse books from other readers
-- search by title, author, or keywords
-- filter by condition, genre, or location
+- search by title or author
+- filter by category
+- view book details, condition, description, and cover image
 - view nearby readers and their available books
-- match wanted books with available books
+- show sample potential exchanges
 
 ### Wishlist
 - save books a user wants to read
@@ -67,12 +71,13 @@ At this stage, the app is a design and interaction prototype. It does not yet us
 
 ## Tech stack
 
-The project is currently built with:
+The current prototype is built with:
 
 - HTML
 - CSS
-- JavaScript
-- static front-end layout
+- vanilla JavaScript
+- browser `localStorage` for shelf persistence
+- browser `FileReader` for local cover-image previews
 
 The planned full-stack stack is:
 
@@ -89,6 +94,7 @@ The app will evolve into a data-driven product with the following structure:
 rizz/
 ├── index.html
 ├── discover.html
+├── matches.html
 ├── near-you.html
 ├── shelf.html
 ├── profile.html
@@ -103,7 +109,7 @@ rizz/
 │   ├── client.js
 │   ├── auth.js
 │   └── db.js
-├── README.md
+├── readme.md
 └── .env.example
 ```
 
@@ -176,6 +182,7 @@ The long-term aim is to make BookXchange a useful everyday app for readers by fo
 rizz/
 ├── index.html
 ├── discover.html
+├── matches.html
 ├── near-you.html
 ├── shelf.html
 ├── profile.html
@@ -188,26 +195,39 @@ rizz/
 ```
 
 ### Purpose of the files
-- `index.html` — landing page and product introduction
-- `discover.html` — browse books and find new reads
-- `near-you.html` — discover readers nearby
-- `shelf.html` — manage books available for exchange
-- `profile.html` — personal reader profile
-- `wishlist.html` — track books users want to find
-- `css/style.css` — core visual design and responsive layout
-- `js/app.js` — prototype interactivity for shelf actions and sample data
+- `index.html` — landing page, recently available books, and product introduction
+- `discover.html` — browse, search, filter, and inspect available books
+- `matches.html` — display sample potential exchanges
+- `near-you.html` — discover nearby readers and inspect their shelves
+- `shelf.html` — add and manage books available for exchange or kept in the library
+- `profile.html` — sample reader profile and exchange history
+- `wishlist.html` — sample list of books the reader wants
+- `css/style.css` — visual design, page layout, dialogs, and responsive styles
+- `js/app.js` — shared rendering, shelf persistence, discovery filters, dialogs, and demo data
 
 ## How the app works today
 
-The current front-end uses sample book data stored in JavaScript. Some of the interactions already in place include:
+The shared script starts with three sample books and four sample nearby readers. Shelf records have this shape:
 
-- rendering a list of books on the shelf
-- adding a book using a modal form
-- selecting a condition and description
-- adding an image file from the local machine
-- deleting a book from the shelf
+```js
+{
+    id,
+    title,
+    author,
+    condition,
+    category,
+    description,
+    image,
+    status,
+    ownerId
+}
+```
 
-This is useful as a working prototype, but it is not yet connected to a real backend.
+Available books are rendered on the shelf and discovery pages. A book can be marked as `available` or `keeping`; only available books appear in discovery. Adding or editing a book updates the shelf, library, and discovery views and saves the result to `localStorage`.
+
+Discovery supports the categories Fiction, Non-fiction, Classics, and Poetry. Selecting a book opens its details, and the request form currently validates the message, logs the request in the browser console, and displays a confirmation alert; it does not send or persist a real request.
+
+The near-you page uses seeded reader records. Selecting a reader opens a profile dialog and displays up to three currently available books. This data is intentionally temporary and will later come from user and book records in Supabase.
 
 ## Supabase integration plan
 
