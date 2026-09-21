@@ -1166,6 +1166,8 @@ function displayDiscoverBooks(
                 "discover-book"
             );
 
+            bookElement.dataset.id = book.id;
+            bookElement.classList.add("clickable-book");
 
             const coverClass =
                 `cover-${index + 1}`;
@@ -1321,6 +1323,182 @@ filterButtons.forEach(
 
             }
         );
+
+    }
+);
+
+/* =========================
+   BOOK DETAIL MODAL
+========================= */
+
+const bookDetailModal =
+    document.getElementById(
+        "book-detail-modal"
+    );
+
+const closeBookDetail =
+    document.getElementById(
+        "close-book-detail"
+    );
+
+const bookDetailOverlay =
+    document.querySelector(
+        ".book-detail-overlay"
+    );
+
+const bookDetailCover =
+    document.getElementById(
+        "book-detail-cover"
+    );
+
+const bookDetailTitle =
+    document.getElementById(
+        "book-detail-title"
+    );
+
+const bookDetailAuthor =
+    document.getElementById(
+        "book-detail-author"
+    );
+
+const bookDetailCondition =
+    document.getElementById(
+        "book-detail-condition"
+    );
+
+const bookDetailDescription =
+    document.getElementById(
+        "book-detail-description"
+    );
+
+
+function openBookDetails(bookId) {
+
+    const book =
+        books.find(function (book) {
+            return book.id === bookId;
+        });
+
+    if (!book || !bookDetailModal) return;
+
+
+    bookDetailTitle.textContent =
+        book.title;
+
+    bookDetailAuthor.textContent =
+        book.author;
+
+    bookDetailCondition.textContent =
+        book.condition;
+
+    bookDetailDescription.textContent =
+        book.description ||
+        "No description provided.";
+
+
+    if (book.image) {
+
+        bookDetailCover.innerHTML = `
+            <img
+                src="${book.image}"
+                alt="${book.title}"
+            >
+        `;
+
+        bookDetailCover.classList.remove(
+            "placeholder"
+        );
+
+    } else {
+
+        bookDetailCover.innerHTML = `
+            <span>
+                ${book.title}
+            </span>
+        `;
+
+        bookDetailCover.classList.add(
+            "placeholder"
+        );
+    }
+
+
+    bookDetailModal.classList.add(
+        "is-open"
+    );
+
+    bookDetailModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+}
+
+
+function closeBookDetails() {
+
+    if (!bookDetailModal) return;
+
+    bookDetailModal.classList.remove(
+        "is-open"
+    );
+
+    bookDetailModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+}
+
+
+if (discoverBookList) {
+
+    discoverBookList.addEventListener(
+        "click",
+        function (event) {
+
+            const bookCard =
+                event.target.closest(
+                    ".clickable-book"
+                );
+
+            if (!bookCard) return;
+
+            const bookId =
+                Number(
+                    bookCard.dataset.id
+                );
+
+            openBookDetails(bookId);
+
+        }
+    );
+}
+
+
+if (closeBookDetail) {
+
+    closeBookDetail.addEventListener(
+        "click",
+        closeBookDetails
+    );
+}
+
+
+if (bookDetailOverlay) {
+
+    bookDetailOverlay.addEventListener(
+        "click",
+        closeBookDetails
+    );
+}
+
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (event.key === "Escape") {
+            closeBookDetails();
+        }
 
     }
 );
