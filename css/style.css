@@ -1589,3 +1589,243 @@ button.delete-book:hover {
 .empty-shelf-link:hover {
     opacity: 0.6;
 }
+
+/* =========================
+   DISCOVER
+========================= */
+
+.discover-intro {
+    max-width: 900px;
+}
+
+.discover-intro .intro-copy {
+    max-width: 500px;
+    margin-top: 18px;
+    color: #777067;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+
+/* Search + filters */
+
+.discover-controls {
+    margin: 55px 0 70px;
+}
+
+.search-wrap {
+    max-width: 620px;
+}
+
+#book-search {
+    width: 100%;
+    padding: 16px 0;
+    border: none;
+    border-bottom: 1px solid #bdb3a4;
+    border-radius: 0;
+    outline: none;
+    background: transparent;
+    color: #29251f;
+    font-family: Arial, sans-serif;
+    font-size: 0.95rem;
+}
+
+#book-search::placeholder {
+    color: #9a9187;
+}
+
+#book-search:focus {
+    border-bottom-color: #29251f;
+}
+
+
+/* Filters */
+
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.filter-button {
+    appearance: none;
+    border: 1px solid #cfc6b7;
+    border-radius: 0;
+    padding: 8px 14px;
+    background: transparent;
+    color: #6d665d;
+    font-family: Arial, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.filter-button:hover {
+    border-color: #29251f;
+    color: #29251f;
+}
+
+.filter-button.active {
+    border-color: #29251f;
+    background: #29251f;
+    color: #f5f1e8;
+}
+
+
+/* Section */
+
+.discover-section {
+    margin-bottom: 100px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.section-heading h2 {
+    margin: 0;
+}
+
+#discover-count {
+    color: #777067;
+    font-family: Arial, sans-serif;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+
+/* Book grid */
+
+.discover-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 45px 28px;
+}
+
+.discover-book {
+    min-width: 0;
+}
+
+.discover-book-cover {
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    margin-bottom: 18px;
+    background: #e5ddd1;
+}
+
+.discover-book-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.discover-book-cover.placeholder {
+    display: flex;
+    align-items: flex-end;
+    padding: 22px;
+    background: #d8d0c1;
+}
+
+.discover-book-cover.placeholder span {
+    max-width: 80%;
+    color: #29251f;
+    font-family: Georgia, serif;
+    font-size: 1.3rem;
+    line-height: 1.15;
+}
+
+.discover-book-info h3 {
+    margin: 0 0 5px;
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: normal;
+}
+
+.discover-book-info .author {
+    margin: 0;
+    color: #777067;
+    font-family: Arial, sans-serif;
+    font-size: 0.78rem;
+}
+
+.discover-book-info .condition {
+    display: inline-block;
+    margin-top: 12px;
+    color: #777067;
+    font-family: Arial, sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+
+/* Empty state */
+
+.discover-empty {
+    grid-column: 1 / -1;
+    padding: 50px 0;
+    border-top: 1px solid #d8d0c1;
+    border-bottom: 1px solid #d8d0c1;
+}
+
+.discover-empty p {
+    margin: 0;
+    color: #777067;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .discover-controls {
+        margin: 40px 0 55px;
+    }
+
+    .discover-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 35px 18px;
+    }
+
+    .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .discover-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+.discover-intro,
+.discover-controls,
+.discover-section {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.discover-intro,
+.discover-controls,
+.discover-section {
+    padding-left: 40px;
+    padding-right: 40px;
+}
