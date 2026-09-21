@@ -798,6 +798,191 @@ if (addBookForm) {
     );
 }
 
+/* =========================
+   DISCOVER
+========================= */
+
+const discoverBookList =
+    document.getElementById("discover-book-list");
+
+const discoverCount =
+    document.getElementById("discover-count");
+
+const bookSearch =
+    document.getElementById("book-search");
+
+const filterButtons =
+    document.querySelectorAll(".filter-button");
+
+
+function displayDiscoverBooks(
+    searchTerm = "",
+    category = "all"
+) {
+    if (!discoverBookList) return;
+
+    discoverBookList.innerHTML = "";
+
+    const availableBooks = books.filter(function (book) {
+        return book.status === "available";
+    });
+
+    const filteredBooks = availableBooks.filter(function (book) {
+
+        const matchesSearch =
+            book.title
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase()) ||
+            book.author
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase());
+
+        return matchesSearch;
+    });
+
+
+    if (discoverCount) {
+        const count = filteredBooks.length;
+
+        discoverCount.textContent =
+            count === 1
+                ? "1 book"
+                : `${count} books`;
+    }
+
+
+    if (filteredBooks.length === 0) {
+        discoverBookList.innerHTML = `
+            <div class="discover-empty">
+                <p>
+                    No books match your search.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    filteredBooks.forEach(function (book, index) {
+
+        const bookElement =
+            document.createElement("article");
+
+        bookElement.classList.add(
+            "discover-book"
+        );
+
+
+        const coverClass =
+            `cover-${index + 1}`;
+
+
+        bookElement.innerHTML = `
+
+            <div class="
+                discover-book-cover
+                ${book.image ? "" : "placeholder"}
+                ${book.image ? "" : coverClass}
+            ">
+
+                ${
+                    book.image
+                        ? `
+                            <img
+                                src="${book.image}"
+                                alt="${book.title}"
+                            >
+                        `
+                        : `
+                            <span>
+                                ${book.title}
+                            </span>
+                        `
+                }
+
+            </div>
+
+
+            <div class="discover-book-info">
+
+                <h3>
+                    ${book.title}
+                </h3>
+
+                <p class="author">
+                    ${book.author}
+                </p>
+
+                <span class="condition">
+                    ${book.condition}
+                </span>
+
+            </div>
+
+        `;
+
+
+        discoverBookList.appendChild(
+            bookElement
+        );
+    });
+}
+
+
+/* Initial display */
+
+displayDiscoverBooks();
+
+
+/* Search */
+
+if (bookSearch) {
+
+    bookSearch.addEventListener(
+        "input",
+        function () {
+
+            displayDiscoverBooks(
+                bookSearch.value
+            );
+
+        }
+    );
+
+}
+
+
+/* Category filters */
+
+filterButtons.forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            filterButtons.forEach(
+                function (button) {
+                    button.classList.remove(
+                        "active"
+                    );
+                }
+            );
+
+            button.classList.add("active");
+
+            displayDiscoverBooks(
+                bookSearch
+                    ? bookSearch.value
+                    : "",
+                button.dataset.category
+            );
+
+        }
+    );
+
+});
+
 
 // =========================
 // DEBUG
