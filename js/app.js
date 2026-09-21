@@ -1381,6 +1381,8 @@ function openBookDetails(bookId) {
 
     if (!book || !bookDetailModal) return;
 
+    requestedBookId = bookId;
+
 
     bookDetailTitle.textContent =
         book.title;
@@ -1512,3 +1514,176 @@ console.log(
     "BookXchange books:",
     books
 );
+
+/* =========================
+   EXCHANGE REQUEST
+========================= */
+
+const requestBookButton =
+    document.getElementById(
+        "request-book-button"
+    );
+
+const requestModal =
+    document.getElementById(
+        "request-modal"
+    );
+
+const closeRequest =
+    document.getElementById(
+        "close-request"
+    );
+
+const requestOverlay =
+    document.querySelector(
+        ".request-overlay"
+    );
+
+const requestForm =
+    document.getElementById(
+        "request-form"
+    );
+
+const requestBookName =
+    document.getElementById(
+        "request-book-name"
+    );
+
+
+let requestedBookId = null;
+
+
+function openRequestModal() {
+
+    if (!requestedBookId || !requestModal) {
+        return;
+    }
+
+
+    const book =
+        books.find(function (book) {
+            return book.id === requestedBookId;
+        });
+
+
+    if (!book) return;
+
+
+    requestBookName.textContent =
+        `${book.title} by ${book.author}`;
+
+
+    requestModal.classList.add(
+        "is-open"
+    );
+
+    requestModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+}
+
+
+function closeRequestModal() {
+
+    if (!requestModal) return;
+
+
+    requestModal.classList.remove(
+        "is-open"
+    );
+
+    requestModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+}
+
+
+if (requestBookButton) {
+
+    requestBookButton.addEventListener(
+        "click",
+        function () {
+
+            /*
+                The currently open
+                book detail modal
+                already corresponds to
+                requestedBookId.
+            */
+
+            openRequestModal();
+
+        }
+    );
+}
+
+
+if (closeRequest) {
+
+    closeRequest.addEventListener(
+        "click",
+        closeRequestModal
+    );
+
+}
+
+
+if (requestOverlay) {
+
+    requestOverlay.addEventListener(
+        "click",
+        closeRequestModal
+    );
+
+}
+
+
+if (requestForm) {
+
+    requestForm.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
+
+
+            const message =
+                document
+                    .getElementById(
+                        "request-message"
+                    )
+                    .value
+                    .trim();
+
+
+            if (!message) return;
+
+
+            console.log(
+                "Exchange request:",
+                {
+                    bookId:
+                        requestedBookId,
+
+                    message:
+                        message
+                }
+            );
+
+
+            requestForm.reset();
+
+            closeRequestModal();
+
+
+            alert(
+                "Your exchange request has been sent."
+            );
+
+        }
+    );
+
+}

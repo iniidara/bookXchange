@@ -123,6 +123,39 @@
 
         </section>
 
+        <section class="request-modal" id="request-modal" aria-hidden="true">
+            <div class="request-overlay"></div>
+
+            <div class="request-panel">
+
+                <button type="button" class="close-request" id="close-request" aria-label="Close">
+                    ×
+                </button>
+
+                <p class="eyebrow">Start a conversation</p>
+
+                <h2>Interested in this book?</h2>
+
+                <p class="request-book-name" id="request-book-name"></p>
+
+                <form id="request-form">
+
+                    <label for="request-message">
+                        Message
+                    </label>
+
+                    <textarea id="request-message"
+                        placeholder="Tell the owner why you'd like to exchange for this book." required></textarea>
+
+                    <button type="submit" class="button primary">
+                        Send request
+                    </button>
+
+                </form>
+
+            </div>
+        </section>
+
     </main>
 
 
