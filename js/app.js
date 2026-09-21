@@ -1777,6 +1777,9 @@ function displayNearbyReaders() {
                 "nearby-reader"
             );
 
+            readerElement.dataset.id = reader.id;
+            readerElement.classList.add("clickable-reader");
+
 
             readerElement.innerHTML = `
 
@@ -1820,3 +1823,228 @@ function displayNearbyReaders() {
 
 
 displayNearbyReaders();
+
+/* =========================
+   READER PROFILE MODAL
+========================= */
+
+const readerProfileModal =
+    document.getElementById(
+        "reader-profile-modal"
+    );
+
+const readerProfileOverlay =
+    document.querySelector(
+        ".reader-profile-overlay"
+    );
+
+const closeReaderProfile =
+    document.getElementById(
+        "close-reader-profile"
+    );
+
+const readerProfileInitials =
+    document.getElementById(
+        "reader-profile-initials"
+    );
+
+const readerProfileName =
+    document.getElementById(
+        "reader-profile-name"
+    );
+
+const readerProfileArea =
+    document.getElementById(
+        "reader-profile-area"
+    );
+
+const readerBooksGrid =
+    document.getElementById(
+        "reader-books-grid"
+    );
+
+
+function openReaderProfile(readerId) {
+
+    const reader =
+        defaultReaders.find(
+            function (reader) {
+                return reader.id === readerId;
+            }
+        );
+
+    if (!reader || !readerProfileModal) {
+        return;
+    }
+
+
+    readerProfileInitials.textContent =
+        reader.initials;
+
+    readerProfileName.textContent =
+        reader.name;
+
+    readerProfileArea.textContent =
+        reader.area;
+
+
+    /*
+        For now, give each seed reader
+        a few books from our existing
+        available books.
+
+        Later this will come directly
+        from that user's Supabase data.
+    */
+
+    const availableBooks =
+        books.filter(function (book) {
+            return book.status === "available";
+        });
+
+
+    readerBooksGrid.innerHTML = "";
+
+
+    if (availableBooks.length === 0) {
+
+        readerBooksGrid.innerHTML = `
+            <div class="reader-books-empty">
+                This reader has no books available
+                for exchange right now.
+            </div>
+        `;
+
+    } else {
+
+        availableBooks
+            .slice(0, 3)
+            .forEach(function (book, index) {
+
+                const bookElement =
+                    document.createElement(
+                        "article"
+                    );
+
+                bookElement.classList.add(
+                    "reader-book"
+                );
+
+
+                bookElement.innerHTML = `
+
+                    <div class="
+                        reader-book-cover
+                        ${book.image ? "" : "placeholder"}
+                    ">
+
+                        ${
+                            book.image
+                                ? `
+                                    <img
+                                        src="${book.image}"
+                                        alt="${book.title}"
+                                    >
+                                `
+                                : `
+                                    <span>
+                                        ${book.title}
+                                    </span>
+                                `
+                        }
+
+                    </div>
+
+
+                    <h4>
+                        ${book.title}
+                    </h4>
+
+                    <p>
+                        ${book.author}
+                    </p>
+
+                `;
+
+
+                readerBooksGrid.appendChild(
+                    bookElement
+                );
+
+            });
+    }
+
+
+    readerProfileModal.classList.add(
+        "is-open"
+    );
+
+    readerProfileModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+}
+
+
+function closeReaderProfileModal() {
+
+    if (!readerProfileModal) {
+        return;
+    }
+
+    readerProfileModal.classList.remove(
+        "is-open"
+    );
+
+    readerProfileModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+}
+
+
+if (nearbyList) {
+
+    nearbyList.addEventListener(
+        "click",
+        function (event) {
+
+            const readerElement =
+                event.target.closest(
+                    ".clickable-reader"
+                );
+
+            if (!readerElement) {
+                return;
+            }
+
+            const readerId =
+                Number(
+                    readerElement.dataset.id
+                );
+
+            openReaderProfile(
+                readerId
+            );
+
+        }
+    );
+}
+
+
+if (closeReaderProfile) {
+
+    closeReaderProfile.addEventListener(
+        "click",
+        closeReaderProfileModal
+    );
+}
+
+
+if (readerProfileOverlay) {
+
+    readerProfileOverlay.addEventListener(
+        "click",
+        closeReaderProfileModal
+    );
+}
