@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,31 +25,75 @@
 
     <main>
 
-        <section class="profile-header">
+        <section class="page-intro profile-intro">
+            <div>
+                <p class="eyebrow">Your profile</p>
+                <h1>
+                    A reader,<br>
+                    first.
+                </h1>
+                <p class="intro-copy">
+                    Tell other readers a little about you and the books you love.
+                </p>
+            </div>
+        </section>
 
-            <div class="profile-avatar">
-                I
+
+        <section class="profile-section">
+
+            <div class="profile-header">
+
+                <div class="profile-avatar" id="profile-avatar">
+                    IS
+                </div>
+
+                <div class="profile-identity">
+                    <p class="eyebrow">Reader</p>
+
+                    <h2 id="profile-name">
+                        Your Name
+                    </h2>
+
+                    <p id="profile-location">
+                        Lagos, Nigeria
+                    </p>
+                </div>
+
             </div>
 
-            <div class="profile-intro">
 
-                <p class="eyebrow">Reader profile</p>
+            <div class="profile-bio-section">
 
-                <h1>Iniidara</h1>
+                <div>
+                    <p class="eyebrow">About</p>
 
-                <p class="profile-location">
-                    📍 Yaba, Lagos
-                </p>
+                    <h3 id="profile-bio">
+                        A reader who believes good books should keep moving.
+                    </h3>
+                </div>
 
-                <p class="profile-bio">
-                    Curious reader. Mostly fiction, essays,
-                    and books that make me rethink things.
-                </p>
+                <button type="button" class="profile-edit-button" id="edit-profile-button">
+                    Edit profile
+                </button>
 
-                <div class="genres">
-                    <span>Literary fiction</span>
-                    <span>Essays</span>
-                    <span>History</span>
+            </div>
+
+
+            <div class="profile-stats">
+
+                <div class="profile-stat">
+                    <span id="profile-book-count">0</span>
+                    <p>Books</p>
+                </div>
+
+                <div class="profile-stat">
+                    <span id="profile-available-count">0</span>
+                    <p>Available</p>
+                </div>
+
+                <div class="profile-stat">
+                    <span id="profile-library-count">0</span>
+                    <p>Keeping</p>
                 </div>
 
             </div>
@@ -56,108 +101,65 @@
         </section>
 
 
-        <section class="profile-reading">
-
-            <div class="currently-reading">
-
-                <p class="eyebrow">Currently reading</p>
-
-                <h2>Never Let Me Go</h2>
-
-                <p>Kazuo Ishiguro</p>
-
-            </div>
-
-            <div class="member-info">
-
-                <p class="eyebrow">On BookXchange</p>
-
-                <p>Since September 2026</p>
-
-            </div>
-
-        </section>
-
-
-        <section class="profile-shelf">
+        <section class="profile-books-section">
 
             <div class="section-heading">
-
                 <div>
-                    <p class="eyebrow">Shelf</p>
-                    <h2>Books available<br>for exchange.</h2>
+                    <p class="eyebrow">Your shelf</p>
+                    <h2>Books you're sharing.</h2>
                 </div>
-
-                <a href="shelf.html">
-                    View full shelf →
-                </a>
-
             </div>
 
-
-            <div class="profile-books">
-
-                <div class="profile-book">
-                    <div class="mini-cover cover-one">
-                        <span>Gatsby</span>
-                    </div>
-
-                    <h3>The Great Gatsby</h3>
-                    <p>F. Scott Fitzgerald</p>
-                </div>
-
-
-                <div class="profile-book">
-                    <div class="mini-cover cover-two">
-                        <span>Norwegian<br>Wood</span>
-                    </div>
-
-                    <h3>Norwegian Wood</h3>
-                    <p>Haruki Murakami</p>
-                </div>
-
-
-                <div class="profile-book">
-                    <div class="mini-cover cover-three">
-                        <span>Secret<br>History</span>
-                    </div>
-
-                    <h3>The Secret History</h3>
-                    <p>Donna Tartt</p>
-                </div>
-
-            </div>
+            <div class="profile-books-grid" id="profile-books-grid"></div>
 
         </section>
 
 
-        <section class="profile-history">
+        <!-- EDIT PROFILE MODAL -->
 
-            <p class="eyebrow">Exchange history</p>
+        <section class="profile-edit-modal" id="profile-edit-modal" aria-hidden="true">
 
-            <h2>Books I've passed on.</h2>
+            <div class="profile-edit-overlay"></div>
 
-            <div class="history-row">
+            <div class="profile-edit-panel">
 
-                <div>
-                    <strong>Atomic Habits</strong>
-                    <span>→</span>
-                    <strong>Educated</strong>
-                </div>
+                <button type="button" class="close-profile-edit" id="close-profile-edit" aria-label="Close">
+                    ×
+                </button>
 
-                <p>with Amara · August 2026</p>
+                <p class="eyebrow">Your profile</p>
 
-            </div>
+                <h2>Tell readers about yourself.</h2>
 
-            <div class="history-row">
+                <form id="profile-form">
 
-                <div>
-                    <strong>Things Fall Apart</strong>
-                    <span>→</span>
-                    <strong>Half of a Yellow Sun</strong>
-                </div>
+                    <label for="profile-name-input">
+                        Name
+                    </label>
 
-                <p>with Chinedu · July 2026</p>
+                    <input type="text" id="profile-name-input" placeholder="Your name" required>
+
+
+                    <label for="profile-location-input">
+                        Location
+                    </label>
+
+                    <input type="text" id="profile-location-input" placeholder="e.g. Yaba, Lagos" required>
+
+
+                    <label for="profile-bio-input">
+                        About you
+                    </label>
+
+                    <textarea id="profile-bio-input" placeholder="Tell other readers something about you."
+                        required></textarea>
+
+
+                    <button type="submit" class="button primary">
+                        Save profile
+                    </button>
+
+                </form>
 
             </div>
 
@@ -175,4 +177,5 @@
     <script src="js/app.js"></script>
 
 </body>
+
 </html>

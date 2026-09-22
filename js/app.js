@@ -2048,3 +2048,269 @@ if (readerProfileOverlay) {
         closeReaderProfileModal
     );
 }
+
+/* =========================
+   PROFILE
+========================= */
+
+const profileName = document.getElementById("profile-name");
+const profileLocation = document.getElementById("profile-location");
+const profileBio = document.getElementById("profile-bio");
+const profileAvatar = document.getElementById("profile-avatar");
+
+const profileBookCount = document.getElementById("profile-book-count");
+const profileAvailableCount = document.getElementById("profile-available-count");
+const profileLibraryCount = document.getElementById("profile-library-count");
+
+const profileBooksGrid = document.getElementById("profile-books-grid");
+
+const editProfileButton = document.getElementById("edit-profile-button");
+const profileEditModal = document.getElementById("profile-edit-modal");
+const closeProfileEdit = document.getElementById("close-profile-edit");
+const profileEditOverlay = document.querySelector(".profile-edit-overlay");
+
+const profileForm = document.getElementById("profile-form");
+
+const profileNameInput = document.getElementById("profile-name-input");
+const profileLocationInput = document.getElementById("profile-location-input");
+const profileBioInput = document.getElementById("profile-bio-input");
+
+
+const defaultProfile = {
+    name: "Your Name",
+    location: "Lagos, Nigeria",
+    bio: "A reader who believes good books should keep moving."
+};
+
+
+let profile = JSON.parse(
+    localStorage.getItem("bookxchangeProfile")
+) || defaultProfile;
+
+
+function saveProfile() {
+    localStorage.setItem(
+        "bookxchangeProfile",
+        JSON.stringify(profile)
+    );
+}
+
+
+function getInitials(name) {
+
+    const words = name
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (words.length === 0) {
+        return "YR";
+    }
+
+    if (words.length === 1) {
+        return words[0].slice(0, 2).toUpperCase();
+    }
+
+    return (
+        words[0][0] +
+        words[words.length - 1][0]
+    ).toUpperCase();
+}
+
+
+function displayProfile() {
+
+    if (!profileName) {
+        return;
+    }
+
+    profileName.textContent = profile.name;
+    profileLocation.textContent = profile.location;
+    profileBio.textContent = profile.bio;
+
+    profileAvatar.textContent = getInitials(profile.name);
+
+
+    const availableBooks = books.filter(
+        book => book.status === "available"
+    );
+
+    const libraryBooks = books.filter(
+        book => book.status === "keeping"
+    );
+
+
+    profileBookCount.textContent = books.length;
+    profileAvailableCount.textContent = availableBooks.length;
+    profileLibraryCount.textContent = libraryBooks.length;
+
+
+    if (!profileBooksGrid) {
+        return;
+    }
+
+
+    profileBooksGrid.innerHTML = "";
+
+
+    if (availableBooks.length === 0) {
+
+        profileBooksGrid.innerHTML = `
+            <div class="empty-shelf">
+                <p>
+                    You aren't sharing any books yet.
+                </p>
+
+                <button
+                    type="button"
+                    class="empty-shelf-link"
+                    id="profile-add-book-link"
+                >
+                    Add a book
+                </button>
+            </div>
+        `;
+
+        const addBookLink =
+            document.getElementById("profile-add-book-link");
+
+        if (addBookLink) {
+            addBookLink.addEventListener("click", () => {
+                window.location.href = "shelf.html";
+            });
+        }
+
+        return;
+    }
+
+
+    availableBooks.forEach(book => {
+
+        const bookElement =
+            document.createElement("article");
+
+        bookElement.className = "profile-book";
+
+        const coverStyle = book.image
+            ? `style="background-image: url('${book.image}')"`
+            : "";
+
+        bookElement.innerHTML = `
+            <div
+                class="profile-book-cover"
+                ${coverStyle}
+            >
+                ${
+                    book.image
+                        ? ""
+                        : "No cover"
+                }
+            </div>
+
+            <div class="profile-book-info">
+
+                <h3>${book.title}</h3>
+
+                <p>${book.author}</p>
+
+            </div>
+        `;
+
+        profileBooksGrid.appendChild(bookElement);
+    });
+}
+
+
+function openProfileEditor() {
+
+    if (!profileEditModal) {
+        return;
+    }
+
+    profileNameInput.value = profile.name;
+    profileLocationInput.value = profile.location;
+    profileBioInput.value = profile.bio;
+
+    profileEditModal.classList.add("is-open");
+    profileEditModal.setAttribute("aria-hidden", "false");
+
+    document.body.style.overflow = "hidden";
+}
+
+
+function closeProfileEditor() {
+
+    if (!profileEditModal) {
+        return;
+    }
+
+    profileEditModal.classList.remove("is-open");
+    profileEditModal.setAttribute("aria-hidden", "true");
+
+    document.body.style.overflow = "";
+}
+
+
+if (editProfileButton) {
+    editProfileButton.addEventListener(
+        "click",
+        openProfileEditor
+    );
+}
+
+
+if (closeProfileEdit) {
+    closeProfileEdit.addEventListener(
+        "click",
+        closeProfileEditor
+    );
+}
+
+
+if (profileEditOverlay) {
+    profileEditOverlay.addEventListener(
+        "click",
+        closeProfileEditor
+    );
+}
+
+
+if (profileForm) {
+
+    profileForm.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            profile = {
+                name: profileNameInput.value.trim(),
+                location: profileLocationInput.value.trim(),
+                bio: profileBioInput.value.trim()
+            };
+
+            saveProfile();
+            displayProfile();
+            closeProfileEditor();
+        }
+    );
+}
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            profileEditModal &&
+            profileEditModal.classList.contains("is-open")
+        ) {
+            closeProfileEditor();
+        }
+
+    }
+);
+
+
+displayProfile();
