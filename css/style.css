@@ -2858,3 +2858,375 @@ button.delete-book:hover {
         padding: 35px 25px;
     }
 }
+
+/* =========================
+   SITE HEADER
+========================= */
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 24px 40px;
+
+    border-bottom: 1px solid #d8d0c1;
+}
+
+.site-logo {
+    color: #29251f;
+
+    font-family: Georgia, serif;
+    font-size: 1.15rem;
+
+    text-decoration: none;
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.site-nav a {
+    position: relative;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.site-nav a:hover {
+    color: #29251f;
+}
+
+.site-nav a.active {
+    color: #29251f;
+}
+
+.site-nav a.active::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: -8px;
+
+    height: 1px;
+
+    background: #29251f;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+    .site-header {
+        padding: 20px;
+    }
+
+    .site-nav {
+        gap: 15px;
+    }
+
+    .site-nav a {
+        font-size: 0.65rem;
+    }
+
+}
+
+/* =========================
+   WISHLIST BUTTONS + FORM
+========================= */
+
+/* Add book button */
+
+#wishlist-page .button,
+.wishlist-heading .button {
+    appearance: none;
+    -webkit-appearance: none;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 16px;
+
+    border: 1px solid #29251f;
+    border-radius: 0;
+
+    background: #29251f;
+    color: #f5f1e8;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    line-height: 1;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.wishlist-heading .button:hover {
+    background: transparent;
+    color: #29251f;
+}
+
+
+/* Remove button */
+
+.wishlist-remove {
+    appearance: none;
+    -webkit-appearance: none;
+
+    padding: 7px 12px;
+
+    border: 1px solid #cfc6b7;
+    border-radius: 0;
+
+    background: transparent;
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.68rem;
+    font-weight: normal;
+    letter-spacing: 0.03em;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.wishlist-remove:hover {
+    border-color: #29251f;
+    background: #29251f;
+    color: #f5f1e8;
+}
+
+
+/* =========================
+   WISHLIST MODAL FORM
+========================= */
+
+.wishlist-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+
+    overflow-y: auto;
+}
+
+.wishlist-modal.is-open {
+    display: flex;
+}
+
+.wishlist-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(41, 37, 31, 0.45);
+}
+
+.wishlist-panel {
+    position: relative;
+    z-index: 1;
+
+    width: min(520px, calc(100% - 40px));
+    box-sizing: border-box;
+
+    margin: 5vh auto;
+    padding: 45px;
+
+    background: #f5f1e8;
+
+    box-shadow: 0 20px 60px rgba(41, 37, 31, 0.15);
+
+    animation: wishlistModalIn 0.25s ease;
+}
+
+.wishlist-panel h2 {
+    margin: 8px 0 32px;
+
+    color: #29251f;
+
+    font-family: Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: normal;
+    line-height: 1.25;
+}
+
+.close-wishlist {
+    appearance: none;
+    -webkit-appearance: none;
+
+    position: absolute;
+    top: 16px;
+    right: 18px;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+    background: transparent;
+    color: #29251f;
+
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: normal;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition: opacity 0.2s ease;
+}
+
+.close-wishlist:hover {
+    opacity: 0.5;
+}
+
+
+/* Form layout */
+
+#wishlist-form {
+    display: flex;
+    flex-direction: column;
+}
+
+#wishlist-form label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #6d665d;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+}
+
+#wishlist-form input,
+#wishlist-form textarea {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    margin: 0 0 22px;
+    padding: 12px 0;
+
+    border: none;
+    border-bottom: 1px solid #cfc6b7;
+    border-radius: 0;
+
+    outline: none;
+
+    background: transparent;
+    color: #29251f;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+
+    transition: border-color 0.2s ease;
+}
+
+#wishlist-form input::placeholder,
+#wishlist-form textarea::placeholder {
+    color: #a49b8f;
+}
+
+#wishlist-form input:focus,
+#wishlist-form textarea:focus {
+    border-bottom-color: #29251f;
+}
+
+#wishlist-form textarea {
+    min-height: 105px;
+
+    padding-top: 10px;
+
+    resize: vertical;
+}
+
+
+/* Submit button */
+
+#wishlist-form .button.primary {
+    appearance: none;
+    -webkit-appearance: none;
+
+    align-self: flex-start;
+
+    margin-top: 5px;
+    padding: 11px 18px;
+
+    border: 1px solid #29251f;
+    border-radius: 0;
+
+    background: #29251f;
+    color: #f5f1e8;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+#wishlist-form .button.primary:hover {
+    background: transparent;
+    color: #29251f;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .wishlist-panel {
+        width: calc(100% - 30px);
+        padding: 38px 25px;
+    }
+
+    .wishlist-panel h2 {
+        font-size: 1.45rem;
+    }
+
+    #wishlist-form .button.primary {
+        width: 100%;
+    }
+
+}

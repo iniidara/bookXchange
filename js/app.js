@@ -734,8 +734,9 @@ if (addBookSection) {
         function (event) {
 
             if (
-                event.target ===
-                addBookSection
+                !event.target.closest(
+                    ".add-book-panel"
+                )
             ) {
 
                 addBookSection.classList.remove(
@@ -2314,3 +2315,427 @@ document.addEventListener(
 
 
 displayProfile();
+
+/* =========================
+   WISHLIST
+========================= */
+
+const wishlistList =
+    document.getElementById("wishlist-list");
+
+const addWishlistButton =
+    document.getElementById("add-wishlist-button");
+
+const wishlistModal =
+    document.getElementById("wishlist-modal");
+
+const closeWishlist =
+    document.getElementById("close-wishlist");
+
+const wishlistOverlay =
+    document.querySelector(".wishlist-overlay");
+
+const wishlistForm =
+    document.getElementById("wishlist-form");
+
+
+let wishlist = JSON.parse(
+    localStorage.getItem("bookxchangeWishlist")
+) || [
+    {
+        id: 1,
+        title: "The Secret History",
+        author: "Donna Tartt",
+        note: "I've heard way too much about this book."
+    },
+    {
+        id: 2,
+        title: "1984",
+        author: "George Orwell",
+        note: "Want to finally read Orwell."
+    },
+    {
+        id: 3,
+        title: "Half of a Yellow Sun",
+        author: "Chimamanda Ngozi Adichie",
+        note: "It's been on my list for ages."
+    },
+    {
+        id: 4,
+        title: "Never Let Me Go",
+        author: "Kazuo Ishiguro",
+        note: "Recommended by a friend."
+    }
+];
+
+
+function saveWishlist() {
+
+    localStorage.setItem(
+        "bookxchangeWishlist",
+        JSON.stringify(wishlist)
+    );
+
+}
+
+
+function displayWishlist() {
+
+    if (!wishlistList) {
+        return;
+    }
+
+    wishlistList.innerHTML = "";
+
+
+    if (wishlist.length === 0) {
+
+        wishlistList.innerHTML = `
+            <div class="empty-shelf">
+                <p>
+                    Your wishlist is empty.
+                </p>
+
+                <button
+                    type="button"
+                    class="empty-shelf-link"
+                    id="empty-wishlist-link"
+                >
+                    Add a book
+                </button>
+            </div>
+        `;
+
+        document
+            .getElementById("empty-wishlist-link")
+            ?.addEventListener(
+                "click",
+                openWishlistModal
+            );
+
+        return;
+    }
+
+
+    wishlist.forEach((book, index) => {
+
+        const article =
+            document.createElement("article");
+
+        article.className = "wishlist-book";
+
+        article.innerHTML = `
+
+            <div class="wishlist-number">
+                ${String(index + 1).padStart(2, "0")}
+            </div>
+
+            <div class="wishlist-main">
+
+                <h3>
+                    ${book.title}
+                </h3>
+
+                <p>
+                    ${book.author}
+                </p>
+
+            </div>
+
+            <div class="wishlist-note">
+
+                <span>Why I want it</span>
+
+                <p>
+                    ${book.note || "No note added."}
+                </p>
+
+            </div>
+
+            <div class="wishlist-status">
+
+                <span>Searching</span>
+
+                <button
+                    type="button"
+                    class="wishlist-remove"
+                    data-id="${book.id}"
+                >
+                    Remove
+                </button>
+
+            </div>
+
+        `;
+
+        wishlistList.appendChild(article);
+
+    });
+
+
+    document
+        .querySelectorAll(".wishlist-remove")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const id =
+                        Number(button.dataset.id);
+
+                    wishlist =
+                        wishlist.filter(
+                            book => book.id !== id
+                        );
+
+                    saveWishlist();
+                    displayWishlist();
+
+                }
+            );
+
+        });
+
+}
+
+
+function openWishlistModal() {
+
+    if (!wishlistModal) {
+        return;
+    }
+
+    wishlistModal.classList.add("is-open");
+
+    wishlistModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+    document.body.style.overflow = "hidden";
+
+}
+
+
+function closeWishlistModal() {
+
+    if (!wishlistModal) {
+        return;
+    }
+
+    wishlistModal.classList.remove("is-open");
+
+    wishlistModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+    document.body.style.overflow = "";
+
+}
+
+
+if (addWishlistButton) {
+
+    addWishlistButton.addEventListener(
+        "click",
+        openWishlistModal
+    );
+
+}
+
+
+if (closeWishlist) {
+
+    closeWishlist.addEventListener(
+        "click",
+        closeWishlistModal
+    );
+
+}
+
+
+if (wishlistModal) {
+
+    wishlistModal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                !event.target.closest(
+                    ".wishlist-panel"
+                )
+            ) {
+                closeWishlistModal();
+            }
+
+        }
+    );
+
+}
+
+
+if (wishlistForm) {
+
+    wishlistForm.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            const title =
+                document
+                    .getElementById("wishlist-title")
+                    .value
+                    .trim();
+
+            const author =
+                document
+                    .getElementById("wishlist-author")
+                    .value
+                    .trim();
+
+            const note =
+                document
+                    .getElementById("wishlist-note")
+                    .value
+                    .trim();
+
+
+            wishlist.push({
+
+                id: Date.now(),
+
+                title,
+
+                author,
+
+                note
+
+            });
+
+
+            saveWishlist();
+
+            displayWishlist();
+
+            wishlistForm.reset();
+
+            closeWishlistModal();
+
+        }
+    );
+
+}
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            wishlistModal &&
+            wishlistModal.classList.contains("is-open")
+        ) {
+            closeWishlistModal();
+        }
+
+    }
+);
+
+
+displayWishlist();
+
+/* =========================
+   WISHLIST MODAL
+========================= */
+
+
+
+
+function openWishlistModal() {
+
+    if (!wishlistModal) {
+        return;
+    }
+
+    wishlistModal.classList.add("is-open");
+
+    wishlistModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+    document.body.style.overflow = "hidden";
+
+}
+
+
+function closeWishlistModal() {
+
+    if (!wishlistModal) {
+        return;
+    }
+
+    wishlistModal.classList.remove("is-open");
+
+    wishlistModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+    document.body.style.overflow = "";
+
+}
+
+
+if (addWishlistButton) {
+
+    addWishlistButton.addEventListener(
+        "click",
+        openWishlistModal
+    );
+
+}
+
+
+if (closeWishlist) {
+
+    closeWishlist.addEventListener(
+        "click",
+        closeWishlistModal
+    );
+
+}
+
+
+if (wishlistOverlay) {
+
+    wishlistOverlay.addEventListener(
+        "click",
+        closeWishlistModal
+    );
+
+}
+
+
+/* Close with Escape */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            wishlistModal &&
+            wishlistModal.classList.contains("is-open")
+        ) {
+
+            closeWishlistModal();
+
+        }
+
+    }
+);

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +10,19 @@
 
 <body>
 
-    <header class="navbar">
-        <a href="index.html" class="logo">BookXchange</a>
+    <header class="site-header">
 
-        <nav>
+        <a href="index.html" class="site-logo">
+            BookXchange
+        </a>
+
+        <nav class="site-nav">
             <a href="discover.html">Discover</a>
             <a href="near-you.html">Near You</a>
             <a href="shelf.html">My Shelf</a>
+            <a href="profile.html">Profile</a>
         </nav>
 
-        <a href="profile.html" class="profile-link">Profile</a>
     </header>
 
 
@@ -44,117 +48,63 @@
                     <h2>Books on my mind.</h2>
                 </div>
 
-                <a href="#" class="button primary">
+                <button type="button" class="button primary" id="add-wishlist-button">
                     + Add a book
-                </a>
+                </button>
             </div>
 
 
-            <div class="wishlist-list">
+            <div class="wishlist-list" id="wishlist-list">
 
 
-                <article class="wishlist-book">
 
-                    <div class="wishlist-number">
-                        01
-                    </div>
-
-                    <div class="wishlist-main">
-                        <h3>The Secret History</h3>
-                        <p>Donna Tartt</p>
-                    </div>
-
-                    <div class="wishlist-note">
-                        <span>Why I want it</span>
-                        <p>
-                            I've heard way too much about this book.
-                        </p>
-                    </div>
-
-                    <div class="wishlist-status">
-                        <span>Searching</span>
-                    </div>
-
-                </article>
-
-
-                <article class="wishlist-book">
-
-                    <div class="wishlist-number">
-                        02
-                    </div>
-
-                    <div class="wishlist-main">
-                        <h3>1984</h3>
-                        <p>George Orwell</p>
-                    </div>
-
-                    <div class="wishlist-note">
-                        <span>Why I want it</span>
-                        <p>
-                            Want to finally read Orwell.
-                        </p>
-                    </div>
-
-                    <div class="wishlist-status">
-                        <span>Searching</span>
-                    </div>
-
-                </article>
-
-
-                <article class="wishlist-book">
-
-                    <div class="wishlist-number">
-                        03
-                    </div>
-
-                    <div class="wishlist-main">
-                        <h3>Half of a Yellow Sun</h3>
-                        <p>Chimamanda Ngozi Adichie</p>
-                    </div>
-
-                    <div class="wishlist-note">
-                        <span>Why I want it</span>
-                        <p>
-                            It's been on my list for ages.
-                        </p>
-                    </div>
-
-                    <div class="wishlist-status">
-                        <span>Searching</span>
-                    </div>
-
-                </article>
-
-
-                <article class="wishlist-book">
-
-                    <div class="wishlist-number">
-                        04
-                    </div>
-
-                    <div class="wishlist-main">
-                        <h3>Never Let Me Go</h3>
-                        <p>Kazuo Ishiguro</p>
-                    </div>
-
-                    <div class="wishlist-note">
-                        <span>Why I want it</span>
-                        <p>
-                            Recommended by a friend.
-                        </p>
-                    </div>
-
-                    <div class="wishlist-status">
-                        <span>Searching</span>
-                    </div>
-
-                </article>
 
 
             </div>
 
+        </section>
+
+        <section class="wishlist-modal" id="wishlist-modal" aria-hidden="true">
+            <div class="wishlist-overlay"></div>
+
+            <div class="wishlist-panel">
+
+                <button type="button" class="close-wishlist" id="close-wishlist" aria-label="Close">
+                    ×
+                </button>
+
+                <p class="eyebrow">Wishlist</p>
+
+                <h2>Add a book you're looking for.</h2>
+
+                <form id="wishlist-form">
+
+                    <label for="wishlist-title">
+                        Title
+                    </label>
+
+                    <input type="text" id="wishlist-title" placeholder="e.g. The Secret History" required>
+
+                    <label for="wishlist-author">
+                        Author
+                    </label>
+
+                    <input type="text" id="wishlist-author" placeholder="e.g. Donna Tartt" required>
+
+                    <label for="wishlist-note">
+                        Why do you want it?
+                    </label>
+
+                    <textarea id="wishlist-note"
+                        placeholder="Tell another reader why you're looking for it."></textarea>
+
+                    <button type="submit" class="button primary">
+                        Add to wishlist
+                    </button>
+
+                </form>
+
+            </div>
         </section>
 
     </main>
@@ -169,4 +119,5 @@
     <script src="js/app.js"></script>
 
 </body>
+
 </html>
