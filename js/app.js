@@ -75,6 +75,122 @@ const defaultReaders = [
 ];
 
 
+/* =========================
+   DEMO READERS (other people)
+========================= */
+
+/*
+    Local stand-in for future Supabase records.
+
+    Shape mapping when the backend lands:
+    - reader                 -> profiles row
+    - reader.location        -> profiles.location
+    - reader.availableBooks  -> books rows (owner_id = reader.id)
+    - reader.wishlist        -> wishlists rows (user_id = reader.id)
+
+    availableBooks use the same record shape as defaultBooks, and
+    wishlist items use the same shape as the user's wishlist, so a
+    future matching algorithm can compare records directly without
+    conversion or rewriting.
+*/
+
+const demoReaders = [
+    {
+        id: 101,
+        name: "David",
+        location: "Yaba",
+        initials: "D",
+        availableBooks: [
+            {
+                id: 1011,
+                title: "The Secret History",
+                author: "Donna Tartt",
+                condition: "Good",
+                category: "fiction",
+                description:
+                    "A literary mystery about a group of college students.",
+                image: "",
+                status: "available",
+                ownerId: 101
+            },
+            {
+                id: 1012,
+                title: "The Remains of the Day",
+                author: "Kazuo Ishiguro",
+                condition: "Fair",
+                category: "fiction",
+                description:
+                    "A quiet story about duty, dignity and regret.",
+                image: "",
+                status: "available",
+                ownerId: 101
+            }
+        ],
+        wishlist: [
+            {
+                id: 1013,
+                title: "The Great Gatsby",
+                author: "F. Scott Fitzgerald",
+                note: "Been meaning to read it for years."
+            },
+            {
+                id: 1014,
+                title: "The Catcher in the Rye",
+                author: "J. D. Salinger",
+                note: "Curious what all the fuss is about."
+            }
+        ]
+    },
+
+    {
+        id: 102,
+        name: "Amara",
+        location: "Yaba",
+        initials: "A",
+        availableBooks: [
+            {
+                id: 1021,
+                title: "1984",
+                author: "George Orwell",
+                condition: "Like New",
+                category: "classics",
+                description:
+                    "Dystopia that still feels current.",
+                image: "",
+                status: "available",
+                ownerId: 102
+            },
+            {
+                id: 1022,
+                title: "Beloved",
+                author: "Toni Morrison",
+                condition: "Good",
+                category: "fiction",
+                description:
+                    "Haunting, and worth the patience.",
+                image: "",
+                status: "available",
+                ownerId: 102
+            }
+        ],
+        wishlist: [
+            {
+                id: 1023,
+                title: "Norwegian Wood",
+                author: "Haruki Murakami",
+                note: "Everyone says start here."
+            },
+            {
+                id: 1024,
+                title: "Half of a Yellow Sun",
+                author: "Chimamanda Ngozi Adichie",
+                note: "On every recommendation list."
+            }
+        ]
+    }
+];
+
+
 let books =
     JSON.parse(localStorage.getItem("bookxchangeBooks")) ||
     defaultBooks;
@@ -2639,6 +2755,14 @@ displayWishlist();
 const matchList =
     document.getElementById("match-list");
 
+
+/*
+    Display-layer demo data. The relationships here mirror
+    demoReaders above (David has The Secret History and wants
+    The Great Gatsby; Amara has 1984 and wants Norwegian Wood).
+    When real matching lands, it will derive matches from
+    demoReaders / Supabase records instead of this array.
+*/
 
 const defaultMatches = [
     {
