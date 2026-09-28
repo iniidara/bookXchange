@@ -2631,3 +2631,154 @@ document.addEventListener(
 
 
 displayWishlist();
+
+/* =========================
+   MATCHES
+========================= */
+
+const matchList =
+    document.getElementById("match-list");
+
+
+const defaultMatches = [
+    {
+        id: 1,
+        name: "David",
+        area: "Yaba",
+        initials: "D",
+        yourBook: {
+            title: "The Great Gatsby",
+            author: "F. Scott Fitzgerald"
+        },
+        theirBook: {
+            title: "The Secret History",
+            author: "Donna Tartt"
+        }
+    },
+    {
+        id: 2,
+        name: "Amara",
+        area: "Yaba",
+        initials: "A",
+        yourBook: {
+            title: "Norwegian Wood",
+            author: "Haruki Murakami"
+        },
+        theirBook: {
+            title: "1984",
+            author: "George Orwell"
+        }
+    }
+];
+
+function displayMatches() {
+
+    if (!matchList) {
+        return;
+    }
+
+    matchList.innerHTML = "";
+
+
+    if (defaultMatches.length === 0) {
+
+        matchList.innerHTML = `
+            <div class="empty-shelf">
+                <p>
+                    No matches yet.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    defaultMatches.forEach(function (match) {
+
+        const matchElement =
+            document.createElement("article");
+
+
+        matchElement.classList.add(
+            "match"
+        );
+
+
+        matchElement.innerHTML = `
+
+            <div class="match-person">
+
+                <div class="match-avatar">
+                    ${match.initials}
+                </div>
+
+                <div>
+                    <h3>${match.name}</h3>
+                    <p>📍 ${match.area}</p>
+                </div>
+
+            </div>
+
+
+            <div class="exchange">
+
+                <div class="exchange-side">
+                    <span>You have</span>
+
+                    <strong>
+                        ${match.yourBook.title}
+                    </strong>
+
+                    <small>
+                        ${match.yourBook.author}
+                    </small>
+                </div>
+
+
+                <div class="exchange-arrow">
+                    ↔
+                </div>
+
+
+                <div class="exchange-side">
+                    <span>${match.name} has</span>
+
+                    <strong>
+                        ${match.theirBook.title}
+                    </strong>
+
+                    <small>
+                        ${match.theirBook.author}
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="match-reason">
+
+                <p>
+                    You want ${match.theirBook.title}.
+                    ${match.name} wants ${match.yourBook.title}.
+                </p>
+
+                <a href="profile.html">
+                    View reader →
+                </a>
+
+            </div>
+
+        `;
+
+
+        matchList.appendChild(
+            matchElement
+        );
+
+    });
+
+}
+
+
+displayMatches();
