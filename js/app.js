@@ -194,7 +194,7 @@ function displayBooks() {
 
 
         const coverClass =
-            `cover-${index + 1}`;
+            ["cover-one", "cover-two", "cover-three"][index % 3];
 
 
         bookElement.innerHTML = `
@@ -1201,9 +1201,6 @@ function displayDiscoverBooks(
             bookElement.dataset.id = book.id;
             bookElement.classList.add("clickable-book");
 
-            const coverClass =
-                `cover-${index + 1}`;
-
 
             bookElement.innerHTML = `
 
@@ -1211,7 +1208,6 @@ function displayDiscoverBooks(
                     class="
                         discover-book-cover
                         ${book.image ? "" : "placeholder"}
-                        ${book.image ? "" : coverClass}
                     "
                 >
 
@@ -1537,15 +1533,6 @@ document.addEventListener(
     }
 );
 
-
-/* =========================
-   DEBUG
-========================= */
-
-console.log(
-    "BookXchange books:",
-    books
-);
 
 /* =========================
    EXCHANGE REQUEST
@@ -1874,7 +1861,7 @@ function openReaderProfile(readerId) {
             }
         );
 
-    if (!reader || !readerProfileModal) {
+    if (!reader || !readerProfileModal || !readerBooksGrid) {
         return;
     }
 
@@ -2332,9 +2319,6 @@ const wishlistModal =
 const closeWishlist =
     document.getElementById("close-wishlist");
 
-const wishlistOverlay =
-    document.querySelector(".wishlist-overlay");
-
 const wishlistForm =
     document.getElementById("wishlist-form");
 
@@ -2647,95 +2631,3 @@ document.addEventListener(
 
 
 displayWishlist();
-
-/* =========================
-   WISHLIST MODAL
-========================= */
-
-
-
-
-function openWishlistModal() {
-
-    if (!wishlistModal) {
-        return;
-    }
-
-    wishlistModal.classList.add("is-open");
-
-    wishlistModal.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-    document.body.style.overflow = "hidden";
-
-}
-
-
-function closeWishlistModal() {
-
-    if (!wishlistModal) {
-        return;
-    }
-
-    wishlistModal.classList.remove("is-open");
-
-    wishlistModal.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-    document.body.style.overflow = "";
-
-}
-
-
-if (addWishlistButton) {
-
-    addWishlistButton.addEventListener(
-        "click",
-        openWishlistModal
-    );
-
-}
-
-
-if (closeWishlist) {
-
-    closeWishlist.addEventListener(
-        "click",
-        closeWishlistModal
-    );
-
-}
-
-
-if (wishlistOverlay) {
-
-    wishlistOverlay.addEventListener(
-        "click",
-        closeWishlistModal
-    );
-
-}
-
-
-/* Close with Escape */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Escape" &&
-            wishlistModal &&
-            wishlistModal.classList.contains("is-open")
-        ) {
-
-            closeWishlistModal();
-
-        }
-
-    }
-);
