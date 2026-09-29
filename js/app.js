@@ -76,6 +76,7 @@ const demoReaders = [
         name: "David",
         location: "Yaba",
         initials: "D",
+        bio: "Collector of campus novels and quiet British fiction.",
         availableBooks: [
             {
                 id: 1011,
@@ -123,6 +124,7 @@ const demoReaders = [
         name: "Amara",
         location: "Yaba",
         initials: "A",
+        bio: "Reads across genres; always hunting for a good classic.",
         availableBooks: [
             {
                 id: 1021,
@@ -2365,6 +2367,128 @@ function displayProfile() {
 }
 
 
+/*
+    Render ANOTHER reader's profile into the profile page
+    structure (profile.html?reader=<id>). Reuses the current
+    user's profile layout, but is read-only: edit controls
+    and personal stats are hidden, and the books grid shows
+    that reader's available books.
+*/
+
+function displayReaderProfilePage(reader) {
+
+    if (!reader || !profileName) {
+        return;
+    }
+
+
+    /* Identity (same elements the current user's profile uses) */
+
+    profileName.textContent =
+        reader.name;
+
+    profileLocation.textContent =
+        reader.location;
+
+    profileBio.textContent =
+        reader.bio || "";
+
+    profileAvatar.textContent =
+        reader.initials ||
+        getInitials(reader.name);
+
+
+    /* Edit controls and stats belong to the current user only */
+
+    if (editProfileButton) {
+        editProfileButton.style.display = "none";
+    }
+
+    [profileBookCount, profileAvailableCount, profileLibraryCount]
+        .forEach(function (statElement) {
+            if (statElement && statElement.parentElement) {
+                statElement.parentElement.style.display = "none";
+            }
+        });
+
+
+    /* "Your shelf" heading only makes sense for the current user */
+
+    const profileSectionHeading =
+        document.querySelector(
+            ".profile-books-section .section-heading"
+        );
+
+    if (profileSectionHeading) {
+        profileSectionHeading.style.display = "none";
+    }
+
+
+    /* Their available books, in the same grid style */
+
+    if (!profileBooksGrid) {
+        return;
+    }
+
+    const availableBooks =
+        getReaderAvailableBooks(reader);
+
+    profileBooksGrid.innerHTML = "";
+
+
+    if (availableBooks.length === 0) {
+
+        profileBooksGrid.innerHTML = `
+            <div class="empty-shelf">
+                <p>
+                    No books available for exchange right now.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    availableBooks.forEach(function (book) {
+
+        const bookElement =
+            document.createElement("article");
+
+        bookElement.className = "profile-book";
+
+        const coverStyle = book.image
+            ? `style="background-image: url('${book.image}')"`
+            : "";
+
+        bookElement.innerHTML = `
+            <div
+                class="profile-book-cover"
+                ${coverStyle}
+            >
+                ${
+                    book.image
+                        ? ""
+                        : book.title
+                }
+            </div>
+
+            <div class="profile-book-info">
+
+                <h3>${book.title}</h3>
+
+                <p>${book.author}</p>
+
+            </div>
+        `;
+
+        profileBooksGrid.appendChild(bookElement);
+
+    });
+
+}
+
+
 function openProfileEditor() {
 
     if (!profileEditModal) {
@@ -3045,9 +3169,10 @@ displayMatches();
 ========================= */
 
 /*
-    profile.html?reader=<id> opens another reader's profile
-    via the shared reader modal. Without the parameter the
-    page shows the current user's editable profile as before.
+    profile.html?reader=<id> renders that reader's profile in
+    the profile page structure. Without the parameter the page
+    shows the current user's editable profile as before.
+    (Supersedes the previous modal-based deep link.)
 */
 
 if (typeof URLSearchParams !== "undefined") {
@@ -3059,8 +3184,11 @@ if (typeof URLSearchParams !== "undefined") {
             ).get("reader")
         );
 
-    if (readerParam) {
-        openReaderProfile(readerParam);
+    const linkedReader =
+        readerParam ? findReaderById(readerParam) : null;
+
+    if (linkedReader) {
+        displayReaderProfilePage(linkedReader);
     }
 
 }
