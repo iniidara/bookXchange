@@ -2749,51 +2749,118 @@ document.addEventListener(
 displayWishlist();
 
 /* =========================
-   MATCHES
+   MATCHING ALGORITHM
+   (pure, DOM-free)
+========================= */
+
+/*
+    Normalize a book title for comparison: trim surrounding
+    whitespace, lowercase, and collapse internal whitespace runs.
+    Exact comparison only - no fuzzy/approximate matching.
+*/
+
+function normalizeBookTitle(title) {
+    return String(title || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
+
+/*
+    A reader is a match only when BOTH are true:
+    1. They have an available book the user's wishlist wants.
+    2. The user has an available book their wishlist wants.
+
+    Inputs are plain data (same shapes as demoReaders /
+    defaultBooks / user wishlist), so this works unchanged
+    when the data later comes from Supabase.
+
+    Returns display-ready match objects:
+    { readerId, name, location, initials, yourBook, theirBook }
+*/
+
+function findMatches(userBooks, userWishlist, readers) {
+
+    const userAvailableBooks =
+        userBooks.filter(function (book) {
+            return book.status === "available";
+        });
+
+    const userWantedTitles =
+        new Set(
+            userWishlist.map(function (item) {
+                return normalizeBookTitle(item.title);
+            })
+        );
+
+    const matches = [];
+
+
+    readers.forEach(function (reader) {
+
+        const theirAvailableBooks =
+            (reader.availableBooks || []).filter(function (book) {
+                return book.status === "available";
+            });
+
+        const theirWantedTitles =
+            new Set(
+                (reader.wishlist || []).map(function (item) {
+                    return normalizeBookTitle(item.title);
+                })
+            );
+
+        /* Condition 1: they have a book the user wants */
+
+        const bookTheyHave =
+            theirAvailableBooks.find(function (book) {
+                return userWantedTitles.has(
+                    normalizeBookTitle(book.title)
+                );
+            });
+
+        /* Condition 2: the user has a book they want */
+
+        const bookTheyWant =
+            userAvailableBooks.find(function (book) {
+                return theirWantedTitles.has(
+                    normalizeBookTitle(book.title)
+                );
+            });
+
+        if (bookTheyHave && bookTheyWant) {
+
+            matches.push({
+                readerId: reader.id,
+                name: reader.name,
+                location: reader.location,
+                initials:
+                    reader.initials ||
+                    String(reader.name || "?").trim().charAt(0).toUpperCase(),
+                yourBook: {
+                    title: bookTheyWant.title,
+                    author: bookTheyWant.author
+                },
+                theirBook: {
+                    title: bookTheyHave.title,
+                    author: bookTheyHave.author
+                }
+            });
+
+        }
+
+    });
+
+    return matches;
+}
+
+
+/* =========================
+   MATCHES PAGE
 ========================= */
 
 const matchList =
     document.getElementById("match-list");
-
-
-/*
-    Display-layer demo data. The relationships here mirror
-    demoReaders above (David has The Secret History and wants
-    The Great Gatsby; Amara has 1984 and wants Norwegian Wood).
-    When real matching lands, it will derive matches from
-    demoReaders / Supabase records instead of this array.
-*/
-
-const defaultMatches = [
-    {
-        id: 1,
-        name: "David",
-        area: "Yaba",
-        initials: "D",
-        yourBook: {
-            title: "The Great Gatsby",
-            author: "F. Scott Fitzgerald"
-        },
-        theirBook: {
-            title: "The Secret History",
-            author: "Donna Tartt"
-        }
-    },
-    {
-        id: 2,
-        name: "Amara",
-        area: "Yaba",
-        initials: "A",
-        yourBook: {
-            title: "Norwegian Wood",
-            author: "Haruki Murakami"
-        },
-        theirBook: {
-            title: "1984",
-            author: "George Orwell"
-        }
-    }
-];
 
 function displayMatches() {
 
@@ -2801,10 +2868,14 @@ function displayMatches() {
         return;
     }
 
+    const matches =
+        findMatches(books, wishlist, demoReaders);
+
+
     matchList.innerHTML = "";
 
 
-    if (defaultMatches.length === 0) {
+    if (matches.length === 0) {
 
         matchList.innerHTML = `
             <div class="empty-shelf">
@@ -2818,7 +2889,7 @@ function displayMatches() {
     }
 
 
-    defaultMatches.forEach(function (match) {
+    matches.forEach(function (match) {
 
         const matchElement =
             document.createElement("article");
@@ -2839,7 +2910,7 @@ function displayMatches() {
 
                 <div>
                     <h3>${match.name}</h3>
-                    <p>📍 ${match.area}</p>
+                    <p>📍 ${match.location}</p>
                 </div>
 
             </div>
