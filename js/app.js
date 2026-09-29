@@ -43,36 +43,12 @@ const defaultBooks = [
     }
 ];
 
-const defaultReaders = [
-    {
-        id: 1,
-        name: "Amara",
-        area: "Yaba",
-        books: 4,
-        initials: "AM"
-    },
-    {
-        id: 2,
-        name: "Daniel",
-        area: "Surulere",
-        books: 7,
-        initials: "DA"
-    },
-    {
-        id: 3,
-        name: "Tomi",
-        area: "Ikeja",
-        books: 3,
-        initials: "TO"
-    },
-    {
-        id: 4,
-        name: "Maya",
-        area: "Gbagada",
-        books: 5,
-        initials: "MY"
-    }
-];
+/*
+    Reader data lives in demoReaders below: one shared list of
+    reader records used by Near You, reader profiles, and the
+    matching algorithm. (Replaces the old seed list, which only
+    had name/area and a hard-coded book count.)
+*/
 
 
 /* =========================
@@ -1824,6 +1800,153 @@ if (requestForm) {
 }
 
 /* =========================
+   READER PROFILES (shared)
+========================= */
+
+/*
+    Reader-profile helpers shared by every surface that shows
+    ANOTHER reader: the Near You list, the reader modal,
+    "View reader" deep links, and any future standalone
+    reader-profile page.
+
+    These are deliberately separate from the CURRENT USER's
+    profile logic (PROFILE section below), which is editable
+    and persists to localStorage.
+*/
+
+function findReaderById(readerId) {
+
+    return demoReaders.find(function (reader) {
+        return reader.id === readerId;
+    }) || null;
+
+}
+
+
+function getReaderAvailableBooks(reader) {
+
+    return ((reader && reader.availableBooks) || []).filter(
+        function (book) {
+            return book.status === "available";
+        }
+    );
+
+}
+
+
+/*
+    Fill any reader-profile container with a reader's data.
+    `targets` supplies the elements to fill:
+
+        initialsElement, nameElement, locationElement, booksGrid
+
+    Returns true when something was rendered. The Near You
+    modal uses it today; a dedicated reader page can pass its
+    own elements without new logic. When Supabase lands,
+    demoReaders becomes a profiles query and this code stays
+    unchanged.
+*/
+
+function renderReaderProfileInto(reader, targets) {
+
+    if (
+        !reader ||
+        !targets ||
+        !targets.initialsElement ||
+        !targets.nameElement ||
+        !targets.locationElement ||
+        !targets.booksGrid
+    ) {
+        return false;
+    }
+
+
+    targets.initialsElement.textContent =
+        reader.initials ||
+        String(reader.name || "?").trim().charAt(0).toUpperCase();
+
+    targets.nameElement.textContent =
+        reader.name;
+
+    targets.locationElement.textContent =
+        reader.location;
+
+
+    const availableBooks =
+        getReaderAvailableBooks(reader);
+
+
+    targets.booksGrid.innerHTML = "";
+
+
+    if (availableBooks.length === 0) {
+
+        targets.booksGrid.innerHTML = `
+            <div class="reader-books-empty">
+                This reader has no books available
+                for exchange right now.
+            </div>
+        `;
+
+        return true;
+    }
+
+
+    availableBooks.forEach(function (book) {
+
+        const bookElement =
+            document.createElement("article");
+
+        bookElement.classList.add("reader-book");
+
+
+        bookElement.innerHTML = `
+
+            <div class="
+                reader-book-cover
+                ${book.image ? "" : "placeholder"}
+            ">
+
+                ${
+                    book.image
+                        ? `
+                            <img
+                                src="${book.image}"
+                                alt="${book.title}"
+                            >
+                        `
+                        : `
+                            <span>
+                                ${book.title}
+                            </span>
+                        `
+                }
+
+            </div>
+
+
+            <h4>
+                ${book.title}
+            </h4>
+
+            <p>
+                ${book.author}
+            </p>
+
+        `;
+
+
+        targets.booksGrid.appendChild(bookElement);
+
+    });
+
+
+    return true;
+
+}
+
+
+/* =========================
    NEAR YOU
 ========================= */
 
@@ -1850,13 +1973,13 @@ function displayNearbyReaders() {
     if (nearbyCount) {
 
         nearbyCount.textContent =
-            defaultReaders.length === 1
+            demoReaders.length === 1
                 ? "1 reader"
-                : `${defaultReaders.length} readers`;
+                : `${demoReaders.length} readers`;
     }
 
 
-    if (defaultReaders.length === 0) {
+    if (demoReaders.length === 0) {
 
         nearbyList.innerHTML = `
             <div class="nearby-empty">
@@ -1868,8 +1991,11 @@ function displayNearbyReaders() {
     }
 
 
-    defaultReaders.forEach(
+    demoReaders.forEach(
         function (reader) {
+
+            const availableCount =
+                getReaderAvailableBooks(reader).length;
 
             const readerElement =
                 document.createElement(
@@ -1899,16 +2025,16 @@ function displayNearbyReaders() {
                     </h3>
 
                     <p>
-                        ${reader.area}
+                        ${reader.location}
                     </p>
 
                 </div>
 
 
                 <div class="reader-books">
-                    ${reader.books}
+                    ${availableCount}
                     ${
-                        reader.books === 1
+                        availableCount === 1
                             ? "book"
                             : "books"
                     }
@@ -1971,112 +2097,25 @@ const readerBooksGrid =
 function openReaderProfile(readerId) {
 
     const reader =
-        defaultReaders.find(
-            function (reader) {
-                return reader.id === readerId;
-            }
-        );
+        findReaderById(readerId);
 
     if (!reader || !readerProfileModal || !readerBooksGrid) {
         return;
     }
 
 
-    readerProfileInitials.textContent =
-        reader.initials;
-
-    readerProfileName.textContent =
-        reader.name;
-
-    readerProfileArea.textContent =
-        reader.area;
-
-
     /*
-        For now, give each seed reader
-        a few books from our existing
-        available books.
-
-        Later this will come directly
-        from that user's Supabase data.
+        The modal supplies its own elements; a future
+        standalone reader page can reuse renderReaderProfileInto
+        with its own targets.
     */
 
-    const availableBooks =
-        books.filter(function (book) {
-            return book.status === "available";
-        });
-
-
-    readerBooksGrid.innerHTML = "";
-
-
-    if (availableBooks.length === 0) {
-
-        readerBooksGrid.innerHTML = `
-            <div class="reader-books-empty">
-                This reader has no books available
-                for exchange right now.
-            </div>
-        `;
-
-    } else {
-
-        availableBooks
-            .slice(0, 3)
-            .forEach(function (book, index) {
-
-                const bookElement =
-                    document.createElement(
-                        "article"
-                    );
-
-                bookElement.classList.add(
-                    "reader-book"
-                );
-
-
-                bookElement.innerHTML = `
-
-                    <div class="
-                        reader-book-cover
-                        ${book.image ? "" : "placeholder"}
-                    ">
-
-                        ${
-                            book.image
-                                ? `
-                                    <img
-                                        src="${book.image}"
-                                        alt="${book.title}"
-                                    >
-                                `
-                                : `
-                                    <span>
-                                        ${book.title}
-                                    </span>
-                                `
-                        }
-
-                    </div>
-
-
-                    <h4>
-                        ${book.title}
-                    </h4>
-
-                    <p>
-                        ${book.author}
-                    </p>
-
-                `;
-
-
-                readerBooksGrid.appendChild(
-                    bookElement
-                );
-
-            });
-    }
+    renderReaderProfileInto(reader, {
+        initialsElement: readerProfileInitials,
+        nameElement: readerProfileName,
+        locationElement: readerProfileArea,
+        booksGrid: readerBooksGrid
+    });
 
 
     readerProfileModal.classList.add(
@@ -2154,7 +2193,8 @@ if (readerProfileOverlay) {
 }
 
 /* =========================
-   PROFILE
+   CURRENT USER'S PROFILE
+   (editable, localStorage)
 ========================= */
 
 const profileName = document.getElementById("profile-name");
@@ -2979,7 +3019,7 @@ function displayMatches() {
                     ${match.name} wants ${match.yourBook.title}.
                 </p>
 
-                <a href="profile.html">
+                <a href="profile.html?reader=${match.readerId}">
                     View reader →
                 </a>
 
@@ -2998,3 +3038,29 @@ function displayMatches() {
 
 
 displayMatches();
+
+
+/* =========================
+   READER PROFILE DEEP LINK
+========================= */
+
+/*
+    profile.html?reader=<id> opens another reader's profile
+    via the shared reader modal. Without the parameter the
+    page shows the current user's editable profile as before.
+*/
+
+if (typeof URLSearchParams !== "undefined") {
+
+    const readerParam =
+        Number(
+            new URLSearchParams(
+                window.location.search
+            ).get("reader")
+        );
+
+    if (readerParam) {
+        openReaderProfile(readerParam);
+    }
+
+}
