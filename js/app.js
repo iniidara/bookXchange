@@ -1964,9 +1964,112 @@ const nearbyCount =
     );
 
 
+/*
+    Prototype location matching: normalized word-token
+    comparison only (trim, lowercase, collapse whitespace,
+    split on non-alphanumeric characters). A reader is
+    "nearby" when the two location strings share any word
+    token, so a saved "Yaba, Lagos" matches a reader in
+    "Yaba" - while "Aba" does not accidentally match
+    "Yaba". Deterministic and GPS-free; Supabase will
+    replace this with real coordinates (e.g. a PostGIS
+    radius query) later.
+*/
+
+function normalizeLocation(location) {
+
+    return String(location || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+
+}
+
+
+function isLocationNearby(locationA, locationB) {
+
+    const tokensA =
+        normalizeLocation(locationA)
+            .split(/[^a-z0-9]+/)
+            .filter(Boolean);
+
+    const tokensB =
+        normalizeLocation(locationB)
+            .split(/[^a-z0-9]+/)
+            .filter(Boolean);
+
+
+    if (
+        tokensA.length === 0 ||
+        tokensB.length === 0
+    ) {
+        return false;
+    }
+
+    return tokensA.some(function (token) {
+        return tokensB.indexOf(token) !== -1;
+    });
+
+}
+
+
+/*
+    Filter readers down to those near the user's location.
+    With no saved location, every reader is shown. Pure data
+    in, data out - no DOM or storage access.
+*/
+
+function getNearbyReaders(readers, userLocation) {
+
+    if (!normalizeLocation(userLocation)) {
+        return readers.slice();
+    }
+
+    return readers.filter(function (reader) {
+        return isLocationNearby(
+            reader.location,
+            userLocation
+        );
+    });
+
+}
+
+
+/*
+    Reads the location saved by the CURRENT USER'S PROFILE
+    section (same "bookxchangeProfile" record). Read directly
+    from storage so Near You can render before that section
+    initializes lower in this file.
+*/
+
+function getCurrentUserLocation() {
+
+    try {
+
+        const stored =
+            JSON.parse(
+                localStorage.getItem("bookxchangeProfile")
+            );
+
+        return (stored && stored.location) || "";
+
+    } catch (error) {
+        return "";
+    }
+
+}
+
+
 function displayNearbyReaders() {
 
     if (!nearbyList) return;
+
+
+    const userLocation =
+        getCurrentUserLocation();
+
+    const nearbyReaders =
+        getNearbyReaders(demoReaders, userLocation);
 
 
     nearbyList.innerHTML = "";
@@ -1975,17 +2078,21 @@ function displayNearbyReaders() {
     if (nearbyCount) {
 
         nearbyCount.textContent =
-            demoReaders.length === 1
+            nearbyReaders.length === 1
                 ? "1 reader"
-                : `${demoReaders.length} readers`;
+                : `${nearbyReaders.length} readers`;
     }
 
 
-    if (demoReaders.length === 0) {
+    if (nearbyReaders.length === 0) {
 
         nearbyList.innerHTML = `
             <div class="nearby-empty">
-                No readers found nearby yet.
+                ${
+                    userLocation
+                        ? `No readers found near ${userLocation} yet.`
+                        : "No readers found nearby yet."
+                }
             </div>
         `;
 
@@ -1993,7 +2100,7 @@ function displayNearbyReaders() {
     }
 
 
-    demoReaders.forEach(
+    nearbyReaders.forEach(
         function (reader) {
 
             const availableCount =
@@ -2224,14 +2331,31 @@ const profileBioInput = document.getElementById("profile-bio-input");
 
 const defaultProfile = {
     name: "Your Name",
-    location: "Lagos, Nigeria",
+
+    /*
+        Matches the demo readers' neighborhood so the Near You
+        prototype shows nearby readers out of the box.
+    */
+    location: "Yaba, Lagos",
+
     bio: "A reader who believes good books should keep moving."
-};
+};let profile =
+    defaultProfile;
 
+try {
 
-let profile = JSON.parse(
-    localStorage.getItem("bookxchangeProfile")
-) || defaultProfile;
+    profile =
+        JSON.parse(
+            localStorage.getItem("bookxchangeProfile")
+        ) || defaultProfile;
+
+} catch (error) {
+
+    /* Corrupt stored profile -> fall back to defaults */
+    profile =
+        defaultProfile;
+
+}
 
 
 function saveProfile() {
