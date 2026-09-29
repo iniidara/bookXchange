@@ -2879,9 +2879,30 @@ function displayMatches() {
 
         matchList.innerHTML = `
             <div class="empty-shelf">
+
                 <p>
-                    No matches yet.
+                    No mutual exchanges yet. A match appears when
+                    another reader has a book you're looking for,
+                    and wants one you're ready to share.
                 </p>
+
+                <p>
+                    Keep adding books to your shelf and wishlist.
+                    Matches appear as your collection grows.
+                </p>
+
+                <div class="empty-shelf-actions">
+
+                    <a href="shelf.html" class="empty-shelf-link">
+                        Add a book to your shelf
+                    </a>
+
+                    <a href="wishlist.html" class="empty-shelf-link">
+                        Add a book to your wishlist
+                    </a>
+
+                </div>
+
             </div>
         `;
 
