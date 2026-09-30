@@ -1847,6 +1847,40 @@ const REQUESTS_STORAGE_KEY =
     "bookxchangeRequests";
 
 
+const defaultRequests = [
+    {
+        id: 9001,
+        requesterId: 1,
+        recipientId: 101,
+        bookId: 1011,
+        message:
+            "Hi David! The Secret History has been on my list for ages. Would you trade it for The Great Gatsby?",
+        status: "pending",
+        createdAt: "2026-09-20T10:00:00.000Z"
+    },
+    {
+        id: 9002,
+        requesterId: 102,
+        recipientId: 1,
+        bookId: 1,
+        message:
+            "I'd love to borrow The Great Gatsby - I can swap my 1984 copy if you like.",
+        status: "accepted",
+        createdAt: "2026-09-22T14:30:00.000Z"
+    },
+    {
+        id: 9003,
+        requesterId: 1,
+        recipientId: 102,
+        bookId: 1021,
+        message:
+            "Is your 1984 still available? Happy to trade Norwegian Wood.",
+        status: "declined",
+        createdAt: "2026-09-24T09:15:00.000Z"
+    }
+];
+
+
 function loadExchangeRequests() {
 
     try {
@@ -1856,10 +1890,10 @@ function loadExchangeRequests() {
                 localStorage.getItem(REQUESTS_STORAGE_KEY)
             );
 
-        return Array.isArray(stored) ? stored : [];
+        return Array.isArray(stored) ? stored : defaultRequests.slice();
 
     } catch (error) {
-        return [];
+        return defaultRequests.slice();
     }
 
 }
@@ -1986,6 +2020,175 @@ function findExchangeRequestById(requestId) {
     }) || null;
 
 }
+
+
+/*
+    Locate a book (user's shelf first, then demo readers'
+    shelves) so a request can display what was asked for.
+*/
+
+function findBookInfoById(bookId) {
+
+    const userBook =
+        books.find(function (book) {
+            return book.id === bookId;
+        });
+
+    if (userBook) {
+        return userBook;
+    }
+
+    for (let i = 0; i < demoReaders.length; i++) {
+
+        const readerBook =
+            (demoReaders[i].availableBooks || []).find(function (book) {
+                return book.id === bookId;
+            });
+
+        if (readerBook) {
+            return readerBook;
+        }
+
+    }
+
+    return null;
+
+}
+
+
+/*
+    The other participant in a request: the owner when the
+    current user sent it, the sender otherwise. Requester id 1
+    is the implicit demo current user (no auth yet).
+*/
+
+function getOtherParticipant(request) {
+
+    const otherId =
+        request.requesterId === 1
+            ? request.recipientId
+            : request.requesterId;
+
+    const reader =
+        findReaderById(otherId);
+
+    return reader ? reader.name : "Another reader";
+
+}
+
+
+/*
+    Exchange-requests list on the profile page. Reuses the
+    wishlist row classes (.wishlist-book etc.) so no new
+    styling was needed. Read-only for now: status changes go
+    through setExchangeRequestStatus until a real UI exists.
+*/
+
+function displayExchangeRequests() {
+
+    const requestsList =
+        document.getElementById("exchange-requests-list");
+
+    if (!requestsList) {
+        return;
+    }
+
+    const requests =
+        loadExchangeRequests();
+
+    const requestsCount =
+        document.getElementById("exchange-requests-count");
+
+    if (requestsCount) {
+
+        requestsCount.textContent =
+            requests.length === 1
+                ? "1 request"
+                : `${requests.length} requests`;
+    }
+
+
+    requestsList.innerHTML = "";
+
+
+    if (requests.length === 0) {
+
+        requestsList.innerHTML = `
+            <div class="empty-shelf">
+                <p>
+                    No exchange requests yet.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    requests.forEach(function (request, index) {
+
+        const book =
+            findBookInfoById(request.bookId);
+
+        const statusLabel =
+            request.status.charAt(0).toUpperCase() +
+            request.status.slice(1);
+
+        const otherReader =
+            getOtherParticipant(request);
+
+        const directionLabel =
+            request.requesterId === 1
+                ? "To " + otherReader
+                : "From " + otherReader;
+
+        const requestElement =
+            document.createElement("article");
+
+        requestElement.className = "wishlist-book";
+
+        requestElement.innerHTML = `
+
+            <div class="wishlist-number">
+                ${String(index + 1).padStart(2, "0")}
+            </div>
+
+            <div class="wishlist-main">
+
+                <h3>
+                    ${book ? book.title : "Unknown book"}
+                </h3>
+
+                <p>
+                    ${book ? book.author : ""}
+                </p>
+
+            </div>
+
+            <div class="wishlist-note">
+
+                <span>${directionLabel}</span>
+
+                <p>
+                    ${request.message || "No message added."}
+                </p>
+
+            </div>
+
+            <div class="wishlist-status">
+                <span>${statusLabel}</span>
+            </div>
+
+        `;
+
+        requestsList.appendChild(requestElement);
+
+    });
+
+}
+
+
+displayExchangeRequests();
 
 /* =========================
    READER PROFILES (shared)

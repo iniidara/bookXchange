@@ -1710,6 +1710,13 @@ button.delete-book:hover {
     white-space: nowrap;
 }
 
+#exchange-requests-count {
+    color: #777067;
+    font-family: Arial, sans-serif;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
 
 /* Book grid */
 
