@@ -1775,22 +1775,39 @@ if (requestForm) {
             if (!message) return;
 
 
-            console.log(
-                "Exchange request:",
-                {
-                    bookId:
-                        requestedBookId,
+            /*
+                Persist the request. Owner resolution: when the
+                requested book belongs to a demo reader we use
+                that reader's id; otherwise it is the current
+                demo user (1). No auth yet, so requester is the
+                implicit local user.
+            */
 
-                    message:
-                        message
-                }
-            );
+            const requestedBook =
+                books.find(function (book) {
+                    return book.id === requestedBookId;
+                });
+
+            if (!requestedBook) return;
+
+            const requesterId = 1; /* demo current user (no auth yet) */
+
+            const recipientId =
+                findReaderById(requestedBook.ownerId)
+                    ? requestedBook.ownerId
+                    : 1;
+
+            createExchangeRequest({
+                bookId: requestedBookId,
+                requesterId: requesterId,
+                recipientId: recipientId,
+                message: message
+            });
 
 
             requestForm.reset();
 
             closeRequestModal();
-
 
             alert(
                 "Your exchange request has been sent."
@@ -1798,6 +1815,101 @@ if (requestForm) {
 
         }
     );
+
+}
+
+/* =========================
+   EXCHANGE REQUESTS
+   (localStorage model)
+========================= */
+
+/*
+    Persisted exchange requests, replacing the old
+    console+alert-only prototype behavior.
+
+    Record shape (localStorage key "bookxchangeRequests"):
+    {
+        id:           number (Date.now()),
+        requesterId:  number (demo current user = 1 until auth),
+        recipientId:  number (book owner; demo reader id or 1),
+        bookId:       number (requested book),
+        message:      string,
+        status:       "pending" | "accepted" | "declined",
+        createdAt:    ISO timestamp string
+    }
+
+    Messages/chat and status transitions are out of scope for
+    now; Supabase will replace this model with a real
+    exchange_requests table.
+*/
+
+const REQUESTS_STORAGE_KEY =
+    "bookxchangeRequests";
+
+
+function loadExchangeRequests() {
+
+    try {
+
+        const stored =
+            JSON.parse(
+                localStorage.getItem(REQUESTS_STORAGE_KEY)
+            );
+
+        return Array.isArray(stored) ? stored : [];
+
+    } catch (error) {
+        return [];
+    }
+
+}
+
+
+function saveExchangeRequests(requests) {
+
+    localStorage.setItem(
+        REQUESTS_STORAGE_KEY,
+        JSON.stringify(requests)
+    );
+
+}
+
+
+/*
+    Create and persist a request from plain data. Returns the
+    stored record (including id/status/createdAt) or null when
+    the required fields are missing. Pure data-in, record-out.
+*/
+
+function createExchangeRequest(input) {
+
+    if (
+        !input ||
+        !input.bookId ||
+        !input.requesterId ||
+        !input.recipientId ||
+        typeof input.message !== "string"
+    ) {
+        return null;
+    }
+
+    const request = {
+        id: Date.now(),
+        requesterId: input.requesterId,
+        recipientId: input.recipientId,
+        bookId: input.bookId,
+        message: input.message,
+        status: "pending",
+        createdAt: new Date().toISOString()
+    };
+
+    const requests = loadExchangeRequests();
+
+    requests.push(request);
+
+    saveExchangeRequests(requests);
+
+    return request;
 
 }
 

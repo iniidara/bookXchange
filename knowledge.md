@@ -33,13 +33,14 @@ python -m http.server 8000        # then open http://localhost:8000/
 Opening `index.html` directly in a browser also works (localStorage is per-origin, so http://localhost vs file:// see different data).
 
 ## How data works (gotchas)
-- **localStorage key:** `bookxchangeBooks` — the only persisted state (user's shelf). Clearing it resets to 3 demo books.
+- **localStorage keys:** `bookxchangeBooks` (user's shelf), `bookxchangeProfile` (name/location/bio), `bookxchangeWishlist`, `bookxchangeRequests` (exchange requests). Clearing `bookxchangeBooks` resets to 3 demo books.
 - **Book record shape:** `{ id, title, author, condition, category, description, image, status, ownerId }`.
 - **Statuses:** `available` or `keeping`. Only `available` books appear in Discover and other pages' grids.
 - **Cover images:** uploaded via `FileReader`, stored as **data URLs in localStorage** (can bloat the 5MB quota).
-- **Demo data lives in `js/app.js`:** `defaultBooks` (3 books) and `defaultReaders` (4 readers) seed everything; near-you/profile/wishlist/matches are static demo content.
+- **Other-reader demo data lives in `js/app.js` `demoReaders`:** David (101) + Amara (102) with embedded `availableBooks` (defaultBooks shape) and `wishlist`; one shared dataset feeds Near You, reader profiles, matches, and the matching algorithm (`findMatches`).
 - **Categories are fixed:** Fiction, Non-fiction, Classics, Poetry.
-- **Exchange requests are fake:** validated, logged to console, alert shown — nothing is sent or stored.
+- **Exchange requests are persisted:** key `bookxchangeRequests`, records `{ id, requesterId, recipientId, bookId, message, status: "pending"|"accepted"|"declined", createdAt }`. Demo ids: requester = 1 (implicit local user, no auth); recipient = the book owner's demo-reader id, or 1 when the book is the demo user's own. No chat, no status transitions yet.
+- **Locations match by word token** (`isLocationNearby`): normalized, split on non-alphanumerics, share any token → "nearby". Supabase will replace with real coordinates.
 - DOM element lookups and page-specific logic all live in `js/app.js` guarded by element existence — element IDs in HTML are load-bearing; renaming one breaks the script silently.
 
 ## Conventions
