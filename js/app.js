@@ -1913,6 +1913,80 @@ function createExchangeRequest(input) {
 
 }
 
+
+/*
+    Valid request statuses, mirroring the planned Supabase
+    exchange_requests.status enum.
+*/
+
+const EXCHANGE_REQUEST_STATUSES = [
+    "pending",
+    "accepted",
+    "declined"
+];
+
+
+/*
+    Change a request's status by id. Only "pending",
+    "accepted", and "declined" are accepted; anything else is
+    rejected without touching storage. The record is updated in
+    place and an updatedAt timestamp is added so a future
+    Supabase row can keep the same audit field.
+
+    Returns the updated request, or null when the request does
+    not exist or the status is invalid.
+*/
+
+function setExchangeRequestStatus(requestId, status) {
+
+    if (EXCHANGE_REQUEST_STATUSES.indexOf(status) === -1) {
+        return null;
+    }
+
+    const requestIdNumber =
+        Number(requestId);
+
+    const requests =
+        loadExchangeRequests();
+
+    const request =
+        requests.find(function (item) {
+            return item.id === requestIdNumber;
+        });
+
+    if (!request) {
+        return null;
+    }
+
+    request.status = status;
+
+    request.updatedAt =
+        new Date().toISOString();
+
+    saveExchangeRequests(requests);
+
+    return request;
+
+}
+
+
+/*
+    Fetch one request by id (number or numeric string).
+    Returns the record or null. Useful for the future status
+    UI and for deep links.
+*/
+
+function findExchangeRequestById(requestId) {
+
+    const requestIdNumber =
+        Number(requestId);
+
+    return loadExchangeRequests().find(function (item) {
+        return item.id === requestIdNumber;
+    }) || null;
+
+}
+
 /* =========================
    READER PROFILES (shared)
 ========================= */
