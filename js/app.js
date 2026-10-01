@@ -2191,6 +2191,393 @@ function displayExchangeRequests() {
 displayExchangeRequests();
 
 /* =========================
+   CHAT (data model)
+   (localStorage, no UI yet)
+========================= */
+
+/*
+    Chat data model for the exchange conversation flow.
+    Prototype-only for now: two localStorage lists, no UI,
+    no backend.
+
+    Record shapes:
+
+    Conversation (localStorage key "bookxchangeConversations"):
+    {
+        id:             number (Date.now() or seed 91xx),
+        participantIds: [number, number] (demo user 1 + reader id),
+        requestId:      number | null (related exchange request),
+        createdAt:      ISO timestamp string
+    }
+
+    Message (localStorage key "bookxchangeMessages"):
+    {
+        id:             number (Date.now() or seed 910xx),
+        conversationId: number (parent conversation),
+        senderId:       number (participant who wrote it),
+        text:           string,
+        createdAt:      ISO timestamp string
+    }
+
+    Supabase mapping (planned tables in readme.md):
+    - conversation -> conversations row (id, request_id,
+      created_at); participantIds resolve to the two profiles
+      involved (e.g. a conversation_participants join table, or
+      derived from the related exchange_request pair).
+    - message -> messages row:
+        id            -> id
+        senderId      -> sender_id
+        (receiver)    -> receiver_id = the other participant
+        requestId     -> request_id (via the conversation)
+        text          -> content
+        createdAt     -> created_at
+
+    Ids stay numbers and timestamps stay ISO strings so the
+    localStorage records can be posted to Supabase nearly
+    as-is once auth arrives.
+*/
+
+const CONVERSATIONS_STORAGE_KEY =
+    "bookxchangeConversations";
+
+const MESSAGES_STORAGE_KEY =
+    "bookxchangeMessages";
+
+
+/*
+    Demo conversations. Conversation 9101 belongs to request
+    9001 (user 1 -> David, The Secret History); conversation
+    9102 belongs to request 9002 (Amara -> user 1, The Great
+    Gatsby). Message timestamps sit after their request's
+    createdAt so a future timeline view reads correctly.
+*/
+
+const defaultConversations = [
+    {
+        id: 9101,
+        participantIds: [1, 101],
+        requestId: 9001,
+        createdAt: "2026-09-20T10:01:00.000Z"
+    },
+    {
+        id: 9102,
+        participantIds: [1, 102],
+        requestId: 9002,
+        createdAt: "2026-09-22T14:35:00.000Z"
+    }
+];
+
+const defaultChatMessages = [
+    {
+        id: 91001,
+        conversationId: 9101,
+        senderId: 1,
+        text:
+            "Hi David! Just sent a request for The Secret History - would The Great Gatsby work as a swap?",
+        createdAt: "2026-09-20T10:01:30.000Z"
+    },
+    {
+        id: 91002,
+        conversationId: 9101,
+        senderId: 101,
+        text:
+            "Hey! Gatsby is already on my wishlist, so that's an easy yes.",
+        createdAt: "2026-09-20T11:12:00.000Z"
+    },
+    {
+        id: 91003,
+        conversationId: 9101,
+        senderId: 1,
+        text:
+            "Great - I can meet at the Yaba library whenever suits you.",
+        createdAt: "2026-09-20T11:30:00.000Z"
+    },
+    {
+        id: 91004,
+        conversationId: 9102,
+        senderId: 102,
+        text:
+            "Thanks for accepting the Gatsby swap! My 1984 copy is in really good shape.",
+        createdAt: "2026-09-22T15:02:00.000Z"
+    },
+    {
+        id: 91005,
+        conversationId: 9102,
+        senderId: 1,
+        text:
+            "No problem. Thursday afternoon at the usual spot in Yaba?",
+        createdAt: "2026-09-22T15:40:00.000Z"
+    }
+];
+
+
+function loadConversations() {
+
+    try {
+
+        const stored =
+            JSON.parse(
+                localStorage.getItem(CONVERSATIONS_STORAGE_KEY)
+            );
+
+        return Array.isArray(stored)
+            ? stored
+            : defaultConversations.slice();
+
+    } catch (error) {
+        return defaultConversations.slice();
+    }
+
+}
+
+
+function saveConversations(conversations) {
+
+    localStorage.setItem(
+        CONVERSATIONS_STORAGE_KEY,
+        JSON.stringify(conversations)
+    );
+
+}
+
+
+/*
+    Create and persist a conversation from plain data. Both
+    participants must be distinct numbers; requestId is
+    optional and becomes null when left out. If a conversation
+    for the same pair (order-independent) about the same
+    request already exists, it is returned instead so the UI
+    never spawns duplicate threads. Returns the stored record
+    or null when validation fails.
+*/
+
+function createConversation(input) {
+
+    if (
+        !input ||
+        !Array.isArray(input.participantIds) ||
+        input.participantIds.length !== 2 ||
+        typeof input.participantIds[0] !== "number" ||
+        typeof input.participantIds[1] !== "number" ||
+        input.participantIds[0] === input.participantIds[1]
+    ) {
+        return null;
+    }
+
+    const requestId =
+        input.requestId === undefined || input.requestId === null
+            ? null
+            : Number(input.requestId);
+
+    const conversations =
+        loadConversations();
+
+    const existing =
+        conversations.find(function (conversation) {
+
+            const sameParticipants =
+                (conversation.participantIds[0] === input.participantIds[0] &&
+                    conversation.participantIds[1] === input.participantIds[1]) ||
+                (conversation.participantIds[0] === input.participantIds[1] &&
+                    conversation.participantIds[1] === input.participantIds[0]);
+
+            const sameRequest =
+                (conversation.requestId || null) === requestId;
+
+            return sameParticipants && sameRequest;
+
+        });
+
+    if (existing) {
+        return existing;
+    }
+
+    const conversation = {
+        id: Date.now(),
+        participantIds: input.participantIds.slice(),
+        requestId: requestId,
+        createdAt: new Date().toISOString()
+    };
+
+    conversations.push(conversation);
+
+    saveConversations(conversations);
+
+    return conversation;
+
+}
+
+
+/*
+    Fetch one conversation by id (number or numeric string).
+    Returns the record or null.
+*/
+
+function findConversationById(conversationId) {
+
+    const conversationIdNumber =
+        Number(conversationId);
+
+    return loadConversations().find(function (conversation) {
+        return conversation.id === conversationIdNumber;
+    }) || null;
+
+}
+
+
+function loadMessages() {
+
+    try {
+
+        const stored =
+            JSON.parse(
+                localStorage.getItem(MESSAGES_STORAGE_KEY)
+            );
+
+        return Array.isArray(stored)
+            ? stored
+            : defaultChatMessages.slice();
+
+    } catch (error) {
+        return defaultChatMessages.slice();
+    }
+
+}
+
+
+function saveMessages(messages) {
+
+    localStorage.setItem(
+        MESSAGES_STORAGE_KEY,
+        JSON.stringify(messages)
+    );
+
+}
+
+
+/*
+    Create and persist a message from plain data. The parent
+    conversation must already exist and the text must not be
+    empty, so orphan or blank messages never reach storage.
+    Returns the stored record (including id/createdAt) or
+    null when validation fails.
+*/
+
+function createMessage(input) {
+
+    if (
+        !input ||
+        !input.conversationId ||
+        !input.senderId ||
+        typeof input.text !== "string" ||
+        input.text.trim() === ""
+    ) {
+        return null;
+    }
+
+    const conversation =
+        findConversationById(input.conversationId);
+
+    if (!conversation) {
+        return null;
+    }
+
+    const message = {
+        id: Date.now(),
+        conversationId: conversation.id,
+        senderId: input.senderId,
+        text: input.text,
+        createdAt: new Date().toISOString()
+    };
+
+    const messages =
+        loadMessages();
+
+    messages.push(message);
+
+    saveMessages(messages);
+
+    return message;
+
+}
+
+
+/*
+    All messages for one conversation, oldest first, so a
+    future chat view can render the thread straight from this
+    list. Returns [] for unknown conversations.
+*/
+
+function getConversationMessages(conversationId) {
+
+    const conversationIdNumber =
+        Number(conversationId);
+
+    return loadMessages()
+        .filter(function (message) {
+            return message.conversationId === conversationIdNumber;
+        })
+        .sort(function (a, b) {
+            return a.createdAt < b.createdAt ? -1 : 1;
+        });
+
+}
+
+
+/*
+    True when readerId is one of the conversation's
+    participants (numeric string ids are accepted). The gate
+    future UI will use before letting the current user read or
+    write in a thread.
+*/
+
+function isConversationParticipant(conversation, readerId) {
+
+    if (
+        !conversation ||
+        !Array.isArray(conversation.participantIds) ||
+        readerId === undefined ||
+        readerId === null
+    ) {
+        return false;
+    }
+
+    return conversation.participantIds.indexOf(Number(readerId)) !== -1;
+
+}
+
+
+/*
+    The other participant's id in a conversation, given the
+    current user's id. Returns null when the conversation is
+    malformed or the given user is not a participant, so the
+    demo user (1) can never be swapped with a stranger.
+*/
+
+function getOtherConversationParticipant(conversation, currentUserId) {
+
+    if (
+        !conversation ||
+        !Array.isArray(conversation.participantIds) ||
+        !isConversationParticipant(conversation, currentUserId)
+    ) {
+        return null;
+    }
+
+    const currentId =
+        Number(currentUserId);
+
+    const otherId =
+        conversation.participantIds.find(function (participantId) {
+            return participantId !== currentId;
+        });
+
+    return otherId === undefined ? null : otherId;
+
+}
+
+
+/* =========================
    READER PROFILES (shared)
 ========================= */
 
