@@ -3237,3 +3237,284 @@ button.delete-book:hover {
     }
 
 }
+
+/* =========================
+   CHAT PAGE
+========================= */
+
+/*
+    Conversation view: reader identity, exchange context,
+    thread, compose form. Editorial rows and hairlines, no
+    bubbles, no new colors or radii.
+*/
+
+.chat-intro {
+    padding-bottom: 55px;
+}
+
+.chat-identity {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.chat-initials {
+    width: 82px;
+    height: 82px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #cfc6b7;
+
+    color: #29251f;
+
+    font-family: Georgia, serif;
+    font-size: 1.15rem;
+}
+
+.chat-identity h1 {
+    margin: 0 0 7px;
+
+    font-size: clamp(2.6rem, 6vw, 4.5rem);
+    line-height: 0.95;
+    font-weight: normal;
+    letter-spacing: -0.05em;
+}
+
+.chat-identity p {
+    margin: 0;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.8rem;
+}
+
+.chat-intro .intro-copy {
+    max-width: 500px;
+    margin-top: 22px;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+
+/* Exchange context strip */
+
+.chat-context-section {
+    border-top: 1px solid #d8d0c1;
+    border-bottom: 1px solid #d8d0c1;
+    padding: 0 40px;
+}
+
+.chat-context {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 26px 0;
+
+    display: flex;
+    align-items: baseline;
+    gap: 40px;
+}
+
+.chat-context-label {
+    flex-shrink: 0;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.chat-context-book {
+    margin: 0;
+
+    font-family: Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: normal;
+}
+
+.chat-context-meta {
+    margin: 0;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.8rem;
+}
+
+
+/* Thread */
+
+.chat-thread-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 70px 40px 110px;
+}
+
+.chat-messages {
+    margin-bottom: 60px;
+}
+
+.chat-message {
+    padding: 22px 0;
+    border-top: 1px solid #d8d0c1;
+}
+
+.chat-message:last-child {
+    border-bottom: 1px solid #d8d0c1;
+}
+
+.chat-message-from {
+    margin: 0 0 6px;
+
+    color: #777067;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.chat-message-from strong {
+    font-weight: normal;
+    color: #29251f;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.chat-message-text {
+    max-width: 640px;
+    margin: 0;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+/* Own messages: pushed right, quieter label, no bubble */
+
+.chat-message.own {
+    text-align: right;
+}
+
+.chat-message.own .chat-message-text {
+    margin-left: auto;
+}
+
+.chat-message.own .chat-message-from strong {
+    color: #777067;
+}
+
+
+/* Compose form */
+
+.chat-compose {
+    border-top: 1px solid #29251f;
+    padding-top: 25px;
+}
+
+.chat-compose-label {
+    display: block;
+    margin: 0 0 12px;
+
+    color: #6d665d;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.chat-compose textarea {
+    width: 100%;
+    min-height: 90px;
+    box-sizing: border-box;
+
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid #cfc6b7;
+    border-radius: 0;
+    outline: none;
+
+    background: transparent;
+    color: #29251f;
+
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.6;
+
+    resize: vertical;
+
+    transition: border-color 0.2s ease;
+}
+
+.chat-compose textarea::placeholder {
+    color: #a49b8f;
+}
+
+.chat-compose textarea:focus {
+    border-bottom-color: #29251f;
+}
+
+.chat-compose .button {
+    margin-top: 22px;
+}
+
+
+/* Empty thread */
+
+.chat-empty {
+    padding: 35px 0;
+    border-top: 1px solid #d8d0c1;
+    border-bottom: 1px solid #d8d0c1;
+}
+
+.chat-empty p {
+    margin: 0;
+
+    color: #777067;
+    font-family: Arial, sans-serif;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .chat-context-section {
+        padding: 0 20px;
+    }
+
+    .chat-context {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .chat-thread-section {
+        padding: 50px 20px 80px;
+    }
+
+    .chat-identity {
+        gap: 18px;
+    }
+
+    .chat-initials {
+        width: 65px;
+        height: 65px;
+        font-size: 1rem;
+    }
+
+    .chat-identity h1 {
+        font-size: 2.4rem;
+    }
+
+}

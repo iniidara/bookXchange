@@ -4092,3 +4092,342 @@ if (typeof URLSearchParams !== "undefined") {
     }
 
 }
+
+/* =========================
+   CHAT PAGE
+========================= */
+
+/*
+    Conversation view (chat.html?conversation=<id>): renders
+    the other reader, the related exchange/book, the message
+    thread, and the compose form. Display only — all storage
+    work happens through the CHAT (data model) helpers, so the
+    view can later read from Supabase without rewriting.
+
+    Without the ?conversation= parameter the page opens the
+    current user's most recent conversation.
+*/
+
+function getChatElements() {
+
+    return {
+        initials: document.getElementById("chat-initials"),
+        name: document.getElementById("chat-reader-name"),
+        location: document.getElementById("chat-reader-location"),
+        contextBook: document.getElementById("chat-context-book"),
+        contextMeta: document.getElementById("chat-context-meta"),
+        messages: document.getElementById("chat-messages"),
+        form: document.getElementById("chat-compose-form"),
+        input: document.getElementById("chat-message-input")
+    };
+
+}
+
+
+/*
+    Compact editorial stamp for a message row, e.g.
+    "Sep 20, 10:01". Returns "" for anything unparsable.
+*/
+
+function formatChatTimestamp(isoTimestamp) {
+
+    const date =
+        new Date(isoTimestamp);
+
+    if (isNaN(date.getTime())) {
+        return "";
+    }
+
+    const month =
+        date.toLocaleString("en-US", { month: "short" });
+
+    const day =
+        date.getDate();
+
+    const hours =
+        String(date.getHours()).padStart(2, "0");
+
+    const minutes =
+        String(date.getMinutes()).padStart(2, "0");
+
+    return month + " " + day + ", " + hours + ":" + minutes;
+
+}
+
+
+function renderChatIdentity(reader, targets) {
+
+    if (!reader || !targets || !targets.initials || !targets.name) {
+        return false;
+    }
+
+    targets.initials.textContent =
+        reader.initials ||
+        String(reader.name || "?").trim().charAt(0).toUpperCase();
+
+    targets.name.textContent =
+        reader.name;
+
+    if (targets.location) {
+        targets.location.textContent =
+            reader.location || "";
+    }
+
+    return true;
+
+}
+
+
+/*
+    The context strip: which book the thread is about and the
+    state of the related request. Threads without a request
+    (e.g. started straight from a match) read as open.
+*/
+
+function renderChatContext(conversation, targets) {
+
+    if (!conversation || !targets || !targets.contextBook) {
+        return false;
+    }
+
+    const otherParticipantId =
+        getOtherConversationParticipant(conversation, 1);
+
+    const otherReader =
+        otherParticipantId
+            ? findReaderById(otherParticipantId)
+            : null;
+
+    const relatedRequest =
+        conversation.requestId
+            ? findExchangeRequestById(conversation.requestId)
+            : null;
+
+    const book =
+        relatedRequest
+            ? findBookInfoById(relatedRequest.bookId)
+            : null;
+
+    targets.contextBook.textContent =
+        book ? book.title : "A book swap";
+
+    if (targets.contextMeta) {
+
+        targets.contextMeta.textContent =
+            (relatedRequest
+                ? "Request " + relatedRequest.status
+                : "Open conversation") +
+            (otherReader ? " with " + otherReader.name : "");
+
+    }
+
+    return true;
+
+}
+
+
+/*
+    Thread rows: quiet small-caps "who · when" line above the
+    text, own messages pushed right with a quieter label. No
+    bubbles — rows and hairlines only.
+*/
+
+function renderChatMessages(conversation, targets) {
+
+    if (!conversation || !targets || !targets.messages) {
+        return false;
+    }
+
+    const messages =
+        getConversationMessages(conversation.id);
+
+    targets.messages.innerHTML = "";
+
+
+    if (messages.length === 0) {
+
+        targets.messages.innerHTML = `
+            <div class="chat-empty">
+                <p>
+                    No messages yet. Say hello.
+                </p>
+            </div>
+        `;
+
+        return true;
+    }
+
+
+    messages.forEach(function (message) {
+
+        const sender =
+            findReaderById(message.senderId);
+
+        const senderName =
+            message.senderId === 1
+                ? "You"
+                : (sender ? sender.name : "Reader");
+
+        const isOwn =
+            message.senderId === 1;
+
+        const messageElement =
+            document.createElement("article");
+
+        messageElement.className =
+            isOwn ? "chat-message own" : "chat-message";
+
+        messageElement.innerHTML = `
+
+            <p class="chat-message-from">
+                <strong>${senderName}</strong>
+                ${formatChatTimestamp(message.createdAt)}
+            </p>
+
+            <p class="chat-message-text">
+                ${message.text}
+            </p>
+
+        `;
+
+        targets.messages.appendChild(messageElement);
+
+    });
+
+    return true;
+
+}
+
+
+/*
+    Submit handler for the compose form. Reads the textarea,
+    stores via createMessage (which validates), re-renders the
+    thread and clears the field. Blank messages are ignored —
+    no error UI needed in the prototype.
+*/
+
+function handleChatSubmit(conversation, targets, event) {
+
+    if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+    }
+
+    if (!conversation || !targets || !targets.input) {
+        return null;
+    }
+
+    const text =
+        targets.input.value;
+
+    if (typeof text !== "string" || text.trim() === "") {
+        return null;
+    }
+
+    const message =
+        createMessage({
+            conversationId: conversation.id,
+            senderId: 1,
+            text: text
+        });
+
+    if (message) {
+
+        renderChatMessages(conversation, targets);
+
+        targets.input.value = "";
+
+    }
+
+    return message;
+
+}
+
+
+function displayConversation() {
+
+    const targets =
+        getChatElements();
+
+    /* Not the chat page -> do nothing. */
+    if (!targets.messages || !targets.form || !targets.input) {
+        return null;
+    }
+
+
+    let conversation = null;
+
+    if (typeof URLSearchParams !== "undefined") {
+
+        const conversationParam =
+            Number(
+                new URLSearchParams(
+                    window.location.search
+                ).get("conversation")
+            );
+
+        conversation =
+            conversationParam
+                ? findConversationById(conversationParam)
+                : null;
+
+    }
+
+
+    /* No/deep-linked-unknown id -> open the latest thread. */
+    if (!conversation) {
+
+        conversation = loadConversations()
+            .filter(function (item) {
+                return isConversationParticipant(item, 1);
+            })
+            .sort(function (a, b) {
+                return b.createdAt.localeCompare(a.createdAt);
+            })[0] || null;
+
+    }
+
+
+    if (!conversation) {
+
+        targets.messages.innerHTML = `
+            <div class="chat-empty">
+                <p>
+                    No conversations yet. Start one from your matches.
+                </p>
+            </div>
+        `;
+
+        /* Still swallow submits so the page never reloads. */
+        targets.form.addEventListener("submit", function (event) {
+            handleChatSubmit(conversation, targets, event);
+        });
+
+        return null;
+    }
+
+
+    const otherParticipantId =
+        getOtherConversationParticipant(conversation, 1);
+
+    renderChatIdentity(
+        otherParticipantId
+            ? findReaderById(otherParticipantId)
+            : null,
+        targets
+    );
+
+    renderChatContext(conversation, targets);
+
+    renderChatMessages(conversation, targets);
+
+
+    targets.form.addEventListener("submit", function (event) {
+        handleChatSubmit(conversation, targets, event);
+    });
+
+    return conversation;
+
+}
+
+
+displayConversation();

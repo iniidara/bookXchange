@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversation | BookXchange</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+
+        <a href="index.html" class="site-logo">
+            BookXchange
+        </a>
+
+        <nav class="site-nav">
+            <a href="discover.html">Discover</a>
+            <a href="near-you.html">Near You</a>
+            <a href="shelf.html">My Shelf</a>
+            <a href="profile.html">Profile</a>
+            <a href="wishlist.html">Wishlist</a>
+            <a href="matches.html">Matches</a>
+        </nav>
+
+    </header>
+
+
+    <main>
+
+        <section class="page-intro chat-intro">
+
+            <p class="eyebrow">Conversation</p>
+
+            <div class="chat-identity" id="chat-identity">
+
+                <div class="chat-initials" id="chat-initials">
+                    ?
+                </div>
+
+                <div class="chat-identity-copy">
+
+                    <h1 id="chat-reader-name">
+                        A reader.
+                    </h1>
+
+                    <p id="chat-reader-location">
+                        &nbsp;
+                    </p>
+
+                </div>
+
+            </div>
+
+            <p class="intro-copy">
+                Trades are settled in person, one book at a time.
+            </p>
+
+        </section>
+
+
+        <section class="chat-context-section">
+
+            <div class="chat-context" id="chat-context">
+
+                <span class="chat-context-label">
+                    About
+                </span>
+
+                <p class="chat-context-book" id="chat-context-book">
+                    &nbsp;
+                </p>
+
+                <p class="chat-context-meta" id="chat-context-meta">
+                    &nbsp;
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="chat-thread-section">
+
+            <div class="chat-messages" id="chat-messages">
+
+            </div>
+
+            <form class="chat-compose" id="chat-compose-form">
+
+                <label class="chat-compose-label" for="chat-message-input">
+                    Write a message
+                </label>
+
+                <textarea id="chat-message-input"
+                    placeholder="Suggest a time and place to swap&hellip;"></textarea>
+
+                <button type="submit" class="button primary">
+                    Send
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        <p>BookXchange</p>
+        <p>Books finding new readers.</p>
+    </footer>
+
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
