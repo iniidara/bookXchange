@@ -2243,6 +2243,9 @@ const CONVERSATIONS_STORAGE_KEY =
 const MESSAGES_STORAGE_KEY =
     "bookxchangeMessages";
 
+const LAST_CONVERSATION_STORAGE_KEY =
+    "bookxchangeLastConversation";
+
 
 /*
     Demo conversations. Conversation 9101 belongs to request
@@ -2421,6 +2424,47 @@ function findConversationById(conversationId) {
     return loadConversations().find(function (conversation) {
         return conversation.id === conversationIdNumber;
     }) || null;
+
+}
+
+
+/*
+    Which conversation the user had open last. chat.html uses
+    this so a plain reload reopens the same thread instead of
+    jumping to the newest one. A single number is stored
+    (JSON-encoded); anything else reads as "none".
+*/
+
+function getLastOpenedConversationId() {
+
+    try {
+
+        const stored =
+            JSON.parse(
+                localStorage.getItem(LAST_CONVERSATION_STORAGE_KEY)
+            );
+
+        return typeof stored === "number" ? stored : null;
+
+    } catch (error) {
+        return null;
+    }
+
+}
+
+
+function setLastOpenedConversationId(conversationId) {
+
+    if (conversationId === undefined || conversationId === null) {
+        return false;
+    }
+
+    localStorage.setItem(
+        LAST_CONVERSATION_STORAGE_KEY,
+        JSON.stringify(Number(conversationId))
+    );
+
+    return true;
 
 }
 
@@ -4104,8 +4148,9 @@ if (typeof URLSearchParams !== "undefined") {
     work happens through the CHAT (data model) helpers, so the
     view can later read from Supabase without rewriting.
 
-    Without the ?conversation= parameter the page opens the
-    current user's most recent conversation.
+    Without a resolvable ?conversation= parameter the page
+    reopens the thread the user had open last (remembered in
+    localStorage), falling back to the most recent one.
 */
 
 function getChatElements() {
@@ -4336,9 +4381,77 @@ function handleChatSubmit(conversation, targets, event) {
 
         targets.input.value = "";
 
+        /* Keep the newest row in view after sending. */
+
+        const messageRows =
+            targets.messages.children;
+
+        const newestRow =
+            messageRows[messageRows.length - 1];
+
+        if (
+            newestRow &&
+            typeof newestRow.scrollIntoView === "function"
+        ) {
+            newestRow.scrollIntoView({ block: "nearest" });
+        }
+
     }
 
     return message;
+
+}
+
+
+/*
+    Which thread the page should open, in priority order:
+
+    1. ?conversation=<id> deep link, when it resolves
+    2. the conversation open last (localStorage memory)
+    3. the current user's most recent conversation
+*/
+
+function getPreferredConversation() {
+
+    if (typeof URLSearchParams !== "undefined") {
+
+        const conversationParam =
+            Number(
+                new URLSearchParams(
+                    window.location.search
+                ).get("conversation")
+            );
+
+        const linked =
+            conversationParam
+                ? findConversationById(conversationParam)
+                : null;
+
+        if (linked) {
+            return linked;
+        }
+
+    }
+
+    const lastOpenedId =
+        getLastOpenedConversationId();
+
+    const lastOpened =
+        lastOpenedId
+            ? findConversationById(lastOpenedId)
+            : null;
+
+    if (lastOpened && isConversationParticipant(lastOpened, 1)) {
+        return lastOpened;
+    }
+
+    return loadConversations()
+        .filter(function (item) {
+            return isConversationParticipant(item, 1);
+        })
+        .sort(function (a, b) {
+            return b.createdAt.localeCompare(a.createdAt);
+        })[0] || null;
 
 }
 
@@ -4354,37 +4467,8 @@ function displayConversation() {
     }
 
 
-    let conversation = null;
-
-    if (typeof URLSearchParams !== "undefined") {
-
-        const conversationParam =
-            Number(
-                new URLSearchParams(
-                    window.location.search
-                ).get("conversation")
-            );
-
-        conversation =
-            conversationParam
-                ? findConversationById(conversationParam)
-                : null;
-
-    }
-
-
-    /* No/deep-linked-unknown id -> open the latest thread. */
-    if (!conversation) {
-
-        conversation = loadConversations()
-            .filter(function (item) {
-                return isConversationParticipant(item, 1);
-            })
-            .sort(function (a, b) {
-                return b.createdAt.localeCompare(a.createdAt);
-            })[0] || null;
-
-    }
+    const conversation =
+        getPreferredConversation();
 
 
     if (!conversation) {
@@ -4404,6 +4488,10 @@ function displayConversation() {
 
         return null;
     }
+
+
+    /* Remember this thread so a plain reload reopens it. */
+    setLastOpenedConversationId(conversation.id);
 
 
     const otherParticipantId =
