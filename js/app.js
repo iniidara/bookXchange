@@ -169,16 +169,347 @@ const demoReaders = [
 ];
 
 
+/* =========================
+   DATA MODEL (canonical)
+========================= */
+
+/*
+    One consistent representation for every BookXchange
+    record, used by both localStorage today and Supabase
+    tomorrow. Load paths normalize whatever is in storage
+    into these shapes, so rendering code never has to guess.
+
+    NOTE ON ORDER: the `let books = ...` initializer (just
+    below this section, before EDITING STATE) runs at load
+    time and calls normalizeBook, so it must come AFTER the
+    const enum declarations. (const bindings are hoisted but
+    not initialized — using them first throws.)
+
+    Canonical shapes (mirror the planned Supabase columns,
+    camelCased):
+
+    user         { id, name, location, bio, initials? }
+    book         { id, ownerId, title, author, condition,
+                   category, description, image, status }
+    wishlist     { id, userId, title, author, note }
+    request      { id, requesterId, recipientId, bookId,
+                   message, status, createdAt, updatedAt? }
+    conversation { id, participantIds: [n, n], requestId|null,
+                   createdAt }
+    message      { id, conversationId, senderId, text,
+                   createdAt }
+
+    Normalizers below are lenient (drop malformed rows,
+    backfill missing optional fields, coerce ids) but never
+    throw: corrupt storage degrades to seeds/empty, same as
+    before. Seeded demo ids are preserved so existing
+    localStorage keeps working unchanged.
+*/
+
+const BOOK_CONDITIONS = [
+    "Like New",
+    "Good",
+    "Fair"
+];
+
+const BOOK_CATEGORIES = [
+    "fiction",
+    "non-fiction",
+    "classics",
+    "poetry"
+];
+
+const BOOK_STATUSES = [
+    "available",
+    "keeping"
+];
+
+const CURRENT_USER_ID = 1;
+
+
+/*
+    Coerce anything into a number id ("101" -> 101) or null.
+    Booleans count as NaN; 0 stays a valid falsy sentinel we
+    treat as missing, matching the rest of the codebase.
+*/
+
+function toRecordId(value) {
+
+    if (value === null || value === undefined || typeof value === "boolean") {
+        return null;
+    }
+
+    const id = Number(value);
+
+    return Number.isFinite(id) && id > 0 ? id : null;
+
+}
+
+
+function firstString(value) {
+    return typeof value === "string" ? value : "";
+}
+
+
+/*
+    tryParseJson wraps JSON.parse for storage reads: returns
+    null on any parse error instead of throwing, so every
+    load path can treat "corrupt" and "absent" identically.
+*/
+
+function tryParseJson(rawText) {
+
+    if (typeof rawText !== "string") {
+        return null;
+    }
+
+    try {
+        return JSON.parse(rawText);
+    } catch (error) {
+        return null;
+    }
+
+}
+
+
+function normalizeUser(input) {
+
+    if (!input || typeof input !== "object") {
+        return null;
+    }
+
+    const id = toRecordId(input.id);
+
+    const name = firstString(input.name).trim();
+
+    if (!id || !name) {
+        return null;
+    }
+
+    return {
+        id: id,
+        name: name,
+        location: firstString(input.location),
+        bio: firstString(input.bio),
+        initials: firstString(input.initials)
+    };
+
+}
+
+
+function normalizeBook(input) {
+
+    if (!input || typeof input !== "object") {
+        return null;
+    }
+
+    const id = toRecordId(input.id);
+
+    const title = firstString(input.title).trim();
+
+    if (!id || !title) {
+        return null;
+    }
+
+    const condition =
+        BOOK_CONDITIONS.indexOf(input.condition) !== -1
+            ? input.condition
+            : "Good";
+
+    const category =
+        BOOK_CATEGORIES.indexOf(input.category) !== -1
+            ? input.category
+            : "fiction";
+
+    const status =
+        BOOK_STATUSES.indexOf(input.status) !== -1
+            ? input.status
+            : "available";
+
+    return {
+        id: id,
+        ownerId: toRecordId(input.ownerId) || CURRENT_USER_ID,
+        title: title,
+        author: firstString(input.author),
+        condition: condition,
+        category: category,
+        description: firstString(input.description),
+        image: firstString(input.image),
+        status: status
+    };
+
+}
+
+
+function normalizeWishlistItem(input) {
+
+    if (!input || typeof input !== "object") {
+        return null;
+    }
+
+    const id = toRecordId(input.id);
+
+    const title = firstString(input.title).trim();
+
+    if (!id || !title) {
+        return null;
+    }
+
+    return {
+        id: id,
+        userId: toRecordId(input.userId) || CURRENT_USER_ID,
+        title: title,
+        author: firstString(input.author),
+        note: firstString(input.note)
+    };
+
+}
+
+
+function normalizeExchangeRequest(input) {
+
+    if (!input || typeof input !== "object") {
+        return null;
+    }
+
+    const id = toRecordId(input.id);
+
+    const requesterId = toRecordId(input.requesterId);
+
+    const recipientId = toRecordId(input.recipientId);
+
+    if (!id || !requesterId || !recipientId || requesterId === recipientId) {
+        return null;
+    }
+
+    const status =
+        EXCHANGE_REQUEST_STATUSES.indexOf(input.status) !== -1
+            ? input.status
+            : "pending";
+
+    return {
+        id: id,
+        requesterId: requesterId,
+        recipientId: recipientId,
+        bookId: toRecordId(input.bookId),
+        message: firstString(input.message),
+        status: status,
+        createdAt: firstString(input.createdAt),
+        updatedAt: firstString(input.updatedAt)
+    };
+
+}
+
+
+function normalizeConversation(input) {
+
+    if (!input || typeof input !== "object") {
+        return null;
+    }
+
+    const id = toRecordId(input.id);
+
+    const participants = Array.isArray(input.participantIds)
+        ? input.participantIds
+            .map(toRecordId)
+            .filter(function (value) { return value !== null; })
+        : [];
+
+    const unique =
+        participants.filter(function (value, index) {
+            return participants.indexOf(value) === index;
+        });
+
+    if (!id || unique.length !== 2) {
+        return null;
+    }
+
+    return {
+        id: id,
+        participantIds: unique,
+        requestId: toRecordId(input.requestId),
+        createdAt: firstString(input.createdAt)
+    };
+
+}
+
+
+function normalizeChatMessage(input) {
+
+    if (!input || typeof input !== "object") {
+        return null;
+    }
+
+    const id = toRecordId(input.id);
+
+    const conversationId = toRecordId(input.conversationId);
+
+    const senderId = toRecordId(input.senderId);
+
+    const text = firstString(input.text);
+
+    if (!id || !conversationId || !senderId || text.trim() === "") {
+        return null;
+    }
+
+    return {
+        id: id,
+        conversationId: conversationId,
+        senderId: senderId,
+        text: text,
+        createdAt: firstString(input.createdAt)
+    };
+
+}
+
+
+/*
+    normalizeRecords maps a parsed storage array to canonical
+    records, silently dropping malformed entries. A non-array
+    (corrupt shape) returns the fallback instead.
+*/
+
+function normalizeRecords(stored, normalizeOne, fallback) {
+
+    if (!Array.isArray(stored)) {
+        return fallback;
+    }
+
+    return stored
+        .map(normalizeOne)
+        .filter(function (record) {
+            return record !== null;
+        });
+
+}
+
+
+/*
+    The current user's shelf. Loaded through the canonical
+    normalizer: rows missing id/title are dropped, unknown
+    conditions/categories/statuses fall back to safe defaults,
+    corrupt storage falls back to the demo books.
+    (Placed below the normalizers on purpose: it executes
+    normalizeBook at load time.)
+*/
+
 let books =
-    JSON.parse(localStorage.getItem("bookxchangeBooks")) ||
-    defaultBooks;
+    normalizeRecords(
+        tryParseJson(
+            localStorage.getItem("bookxchangeBooks")
+        ),
+        normalizeBook,
+        defaultBooks.slice()
+    );
 
 
 function saveBooks() {
+
     localStorage.setItem(
         "bookxchangeBooks",
         JSON.stringify(books)
     );
+
 }
 
 
@@ -1883,18 +2214,12 @@ const defaultRequests = [
 
 function loadExchangeRequests() {
 
-    try {
+    const stored =
+        tryParseJson(
+            localStorage.getItem(REQUESTS_STORAGE_KEY)
+        );
 
-        const stored =
-            JSON.parse(
-                localStorage.getItem(REQUESTS_STORAGE_KEY)
-            );
-
-        return Array.isArray(stored) ? stored : defaultRequests.slice();
-
-    } catch (error) {
-        return defaultRequests.slice();
-    }
+    return normalizeRecords(stored, normalizeExchangeRequest, defaultRequests.slice());
 
 }
 
@@ -2027,6 +2352,35 @@ function findExchangeRequestById(requestId) {
     shelves) so a request can display what was asked for.
 */
 
+/*
+    The current user as a canonical user record. Reads storage
+    directly instead of the `profile` variable so this is safe
+    to call from any load-order position (the file has run into
+    TDZ issues with that variable before). Supabase swap: the
+    session user's profiles row.
+*/
+
+function getCurrentUser() {
+
+    return normalizeUser(
+        Object.assign(
+            {},
+            tryParseJson(
+                localStorage.getItem("bookxchangeProfile")
+            ) || {},
+            { id: CURRENT_USER_ID }
+        )
+    ) || {
+        id: CURRENT_USER_ID,
+        name: "Your Name",
+        location: "Yaba, Lagos",
+        bio: "",
+        initials: ""
+    };
+
+}
+
+
 function findBookInfoById(bookId) {
 
     const userBook =
@@ -2065,7 +2419,7 @@ function findBookInfoById(bookId) {
 function getOtherParticipant(request) {
 
     const otherId =
-        request.requesterId === 1
+        request.requesterId === CURRENT_USER_ID
             ? request.recipientId
             : request.requesterId;
 
@@ -2138,7 +2492,7 @@ function displayExchangeRequests() {
             getOtherParticipant(request);
 
         const directionLabel =
-            request.requesterId === 1
+            request.requesterId === CURRENT_USER_ID
                 ? "To " + otherReader
                 : "From " + otherReader;
 
@@ -2316,20 +2670,12 @@ const defaultChatMessages = [
 
 function loadConversations() {
 
-    try {
+    const stored =
+        tryParseJson(
+            localStorage.getItem(CONVERSATIONS_STORAGE_KEY)
+        );
 
-        const stored =
-            JSON.parse(
-                localStorage.getItem(CONVERSATIONS_STORAGE_KEY)
-            );
-
-        return Array.isArray(stored)
-            ? stored
-            : defaultConversations.slice();
-
-    } catch (error) {
-        return defaultConversations.slice();
-    }
+    return normalizeRecords(stored, normalizeConversation, defaultConversations.slice());
 
 }
 
@@ -2471,20 +2817,12 @@ function setLastOpenedConversationId(conversationId) {
 
 function loadMessages() {
 
-    try {
+    const stored =
+        tryParseJson(
+            localStorage.getItem(MESSAGES_STORAGE_KEY)
+        );
 
-        const stored =
-            JSON.parse(
-                localStorage.getItem(MESSAGES_STORAGE_KEY)
-            );
-
-        return Array.isArray(stored)
-            ? stored
-            : defaultChatMessages.slice();
-
-    } catch (error) {
-        return defaultChatMessages.slice();
-    }
+    return normalizeRecords(stored, normalizeChatMessage, defaultChatMessages.slice());
 
 }
 
@@ -3159,23 +3497,24 @@ const defaultProfile = {
     location: "Yaba, Lagos",
 
     bio: "A reader who believes good books should keep moving."
-};let profile =
-    defaultProfile;
+};
 
-try {
 
-    profile =
-        JSON.parse(
-            localStorage.getItem("bookxchangeProfile")
-        ) || defaultProfile;
+/*
+    Stored profiles predate ids (the current user is implicit),
+    so the id is injected before normalizing. Corrupt storage
+    still falls back to defaultProfile.
+*/
 
-} catch (error) {
-
-    /* Corrupt stored profile -> fall back to defaults */
-    profile =
-        defaultProfile;
-
-}
+let profile =
+    normalizeUser(
+        Object.assign(
+            { id: CURRENT_USER_ID },
+            tryParseJson(
+                localStorage.getItem("bookxchangeProfile")
+            ) || {}
+        )
+    ) || defaultProfile;
 
 
 function saveProfile() {
@@ -3547,9 +3886,7 @@ const wishlistForm =
     document.getElementById("wishlist-form");
 
 
-let wishlist = JSON.parse(
-    localStorage.getItem("bookxchangeWishlist")
-) || [
+const defaultWishlist = [
     {
         id: 1,
         title: "The Secret History",
@@ -3575,6 +3912,16 @@ let wishlist = JSON.parse(
         note: "Recommended by a friend."
     }
 ];
+
+
+let wishlist =
+    normalizeRecords(
+        tryParseJson(
+            localStorage.getItem("bookxchangeWishlist")
+        ),
+        normalizeWishlistItem,
+        defaultWishlist.slice()
+    );
 
 
 function saveWishlist() {
@@ -4236,7 +4583,7 @@ function renderChatContext(conversation, targets) {
     }
 
     const otherParticipantId =
-        getOtherConversationParticipant(conversation, 1);
+        getOtherConversationParticipant(conversation, CURRENT_USER_ID);
 
     const otherReader =
         otherParticipantId
@@ -4309,12 +4656,12 @@ function renderChatMessages(conversation, targets) {
             findReaderById(message.senderId);
 
         const senderName =
-            message.senderId === 1
+            message.senderId === CURRENT_USER_ID
                 ? "You"
                 : (sender ? sender.name : "Reader");
 
         const isOwn =
-            message.senderId === 1;
+            message.senderId === CURRENT_USER_ID;
 
         const messageElement =
             document.createElement("article");
@@ -4371,7 +4718,7 @@ function handleChatSubmit(conversation, targets, event) {
     const message =
         createMessage({
             conversationId: conversation.id,
-            senderId: 1,
+            senderId: CURRENT_USER_ID,
             text: text
         });
 
@@ -4441,13 +4788,13 @@ function getPreferredConversation() {
             ? findConversationById(lastOpenedId)
             : null;
 
-    if (lastOpened && isConversationParticipant(lastOpened, 1)) {
+    if (lastOpened && isConversationParticipant(lastOpened, CURRENT_USER_ID)) {
         return lastOpened;
     }
 
     return loadConversations()
         .filter(function (item) {
-            return isConversationParticipant(item, 1);
+            return isConversationParticipant(item, CURRENT_USER_ID);
         })
         .sort(function (a, b) {
             return b.createdAt.localeCompare(a.createdAt);
@@ -4495,7 +4842,7 @@ function displayConversation() {
 
 
     const otherParticipantId =
-        getOtherConversationParticipant(conversation, 1);
+        getOtherConversationParticipant(conversation, CURRENT_USER_ID);
 
     renderChatIdentity(
         otherParticipantId
